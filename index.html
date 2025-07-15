@@ -202,8 +202,7 @@
             <!-- Image Upload Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Image Source</h2>
-                <input type="file" id="imageUpload" accept="image/*" class="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 
-focus:ring-blue-500 focus:border-transparent">
+                <input type="file" id="imageUpload" accept="image/*" class="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
 
             <!-- Color Overlay Panel -->
@@ -220,8 +219,7 @@ focus:ring-blue-500 focus:border-transparent">
                         <button class="overlay-preset-btn bg-black text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#000000">Black</button>
                         <button class="overlay-preset-btn bg-yellow-800 text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#704214">Sepia</button>
                         <button class="overlay-preset-btn bg-gray-700 text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#333333">Dark Gray</button>
-                        <button class="overlay-preset-btn bg-white text-gray-800 border border-gray-300 py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" 
-data-color="#FFFFFF">White</button>
+                        <button class="overlay-preset-btn bg-white text-gray-800 border border-gray-300 py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#FFFFFF">White</button>
                         <button class="overlay-preset-btn bg-teal-600 text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#008080">Teal</button>
                         <button class="overlay-preset-btn bg-purple-600 text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#800080">Purple</button>
                     </div>
@@ -253,16 +251,21 @@ data-color="#FFFFFF">White</button>
                         <span id="shadowHexValue" class="text-gray-700 font-mono text-sm">#000000</span>
                     </div>
                     <div>
+                        <label for="shadowOpacity" class="block text-gray-600 font-medium mb-1">Opacity:</label>
+                        <input type="range" id="shadowOpacity" min="0" max="1" step="0.01" value="0.75" class="w-full">
+                        <span id="shadowOpacityValue" class="block text-right text-gray-700 text-sm mt-1">0.75</span>
+                    </div>
+                    <div>
                         <label for="shadowBlur" class="block text-gray-600 font-medium mb-1">Blur:</label>
-                        <input type="range" id="shadowBlur" min="0" max="50" step="1" value="10" class="w-full">
+                        <input type="range" id="shadowBlur" min="0" max="150" step="1" value="10" class="w-full">
                         <span id="shadowBlurValue" class="block text-right text-gray-700 text-sm mt-1">10px</span>
                     </div>
                     <div>
                         <label for="shadowDistance" class="block text-gray-600 font-medium mb-1">Distance:</label>
-                        <input type="range" id="shadowDistance" min="0" max="50" step="1" value="5" class="w-full">
+                        <input type="range" id="shadowDistance" min="0" max="150" step="1" value="5" class="w-full">
                         <span id="shadowDistanceValue" class="block text-right text-gray-700 text-sm mt-1">5px</span>
                     </div>
-                    <div>
+                    <div class="sm:col-span-2"> <!-- Span two columns for better layout -->
                         <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
                         <input type="range" id="shadowAngle" min="0" max="360" step="1" value="45" class="w-full">
                         <span id="shadowAngleValue" class="block text-right text-gray-700 text-sm mt-1">45°</span>
@@ -284,7 +287,7 @@ data-color="#FFFFFF">White</button>
                 </div>
                 <div>
                     <label for="outlineWidth" class="block text-gray-600 font-medium mb-2">Width:</label>
-                    <input type="range" id="outlineWidth" min="0" max="10" step="1" value="2" class="w-full">
+                    <input type="range" id="outlineWidth" min="0" max="100" step="1" value="2" class="w-full">
                     <span id="outlineWidthValue" class="block text-right text-gray-700 text-sm mt-1">2px</span>
                 </div>
             </div>
@@ -313,13 +316,15 @@ data-color="#FFFFFF">White</button>
         const overlayOpacityInput = document.getElementById('overlayOpacity');
         const overlayOpacityValueSpan = document.getElementById('overlayOpacityValue');
 
-        const overlayPresetBtns = document.querySelectorAll('.overlay-preset-btn'); // New: Preset buttons
+        const overlayPresetBtns = document.querySelectorAll('.overlay-preset-btn');
 
         const activatePenToolBtn = document.getElementById('activatePenTool');
         const clearMaskBtn = document.getElementById('clearMask');
 
         const shadowColorInput = document.getElementById('shadowColor');
         const shadowHexValueSpan = document.getElementById('shadowHexValue');
+        const shadowOpacityInput = document.getElementById('shadowOpacity'); // New: Shadow Opacity
+        const shadowOpacityValueSpan = document.getElementById('shadowOpacityValue'); // New: Shadow Opacity Value
         const shadowBlurInput = document.getElementById('shadowBlur');
         const shadowBlurValueSpan = document.getElementById('shadowBlurValue');
         const shadowDistanceInput = document.getElementById('shadowDistance');
@@ -327,7 +332,6 @@ data-color="#FFFFFF">White</button>
         const shadowAngleInput = document.getElementById('shadowAngle');
         const shadowAngleValueSpan = document.getElementById('shadowAngleValue');
 
-        // New: Outline controls
         const enableOutlineInput = document.getElementById('enableOutline');
         const outlineColorInput = document.getElementById('outlineColor');
         const outlineHexValueSpan = document.getElementById('outlineHexValue');
@@ -350,15 +354,31 @@ data-color="#FFFFFF">White</button>
         const defaultOverlayColor = '#3b82f6';
         const defaultOverlayOpacity = 0.5;
         const defaultShadowColor = '#000000';
+        const defaultShadowOpacity = 0.75; // New default
         const defaultShadowBlur = 10;
         const defaultShadowDistance = 5;
         const defaultShadowAngle = 45;
-        // New default outline values
         const defaultEnableOutline = false;
         const defaultOutlineColor = '#ffffff';
         const defaultOutlineWidth = 2;
 
         const defaultImageUrl = 'https://placehold.co/700x500/A0B0C0/FFFFFF?text=Upload+Image'; // Placeholder image
+
+        // Helper function to convert hex to RGBA
+        function hexToRgba(hex, alpha) {
+            let r = 0, g = 0, b = 0;
+            // Handle #RGB format
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            } else if (hex.length === 7) {
+                r = parseInt(hex.substring(1, 3), 16);
+                g = parseInt(hex.substring(3, 5), 16);
+                b = parseInt(hex.substring(5, 7), 16);
+            }
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
 
         // Initialize controls with default values
         function initializeControls() {
@@ -369,6 +389,8 @@ data-color="#FFFFFF">White</button>
 
             shadowColorInput.value = defaultShadowColor;
             shadowHexValueSpan.textContent = defaultShadowColor;
+            shadowOpacityInput.value = defaultShadowOpacity; // Set new default
+            shadowOpacityValueSpan.textContent = defaultShadowOpacity.toFixed(2); // Display new default
             shadowBlurInput.value = defaultShadowBlur;
             shadowBlurValueSpan.textContent = `${defaultShadowBlur}px`;
             shadowDistanceInput.value = defaultShadowDistance;
@@ -376,7 +398,6 @@ data-color="#FFFFFF">White</button>
             shadowAngleInput.value = defaultShadowAngle;
             shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
 
-            // Initialize new outline controls
             enableOutlineInput.checked = defaultEnableOutline;
             outlineColorInput.value = defaultOutlineColor;
             outlineHexValueSpan.textContent = defaultOutlineColor;
@@ -404,7 +425,6 @@ data-color="#FFFFFF">White</button>
         function loadImage(src) {
             originalImage.onload = () => {
                 isImageLoaded = true;
-                // Set canvas dimensions to match image, or a default if no image is loaded yet
                 canvas.width = originalImage.width;
                 canvas.height = originalImage.height;
                 draw();
@@ -413,7 +433,6 @@ data-color="#FFFFFF">White</button>
             originalImage.onerror = () => {
                 isImageLoaded = false;
                 showMessage('Failed to load image. Please try another one.', 'error');
-                // Fallback to placeholder if image fails to load
                 originalImage.src = defaultImageUrl;
             };
             originalImage.src = src;
@@ -422,7 +441,6 @@ data-color="#FFFFFF">White</button>
         // Main drawing function
         function draw() {
             if (!isImageLoaded) {
-                // Draw placeholder if no image is loaded
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#f0f0f0';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -434,11 +452,10 @@ data-color="#FFFFFF">White</button>
                 return;
             }
 
-            // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 1. Draw Bottom Layer with Color Overlay
-            ctx.save(); // Save state before applying overlay
+            ctx.save();
             ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
 
             const overlayColor = overlayColorInput.value;
@@ -447,64 +464,52 @@ data-color="#FFFFFF">White</button>
             ctx.fillStyle = overlayColor;
             ctx.globalAlpha = overlayOpacity;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.restore(); // Restore state to remove globalAlpha and fillStyle
+            ctx.restore();
 
             // 2. Draw Top Layer with Mask and Drop Shadow
             if (maskPath) {
-                // Create a temporary canvas to draw the masked image onto
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
 
-                tempCtx.save(); // Save the state of the temporary context
-
-                // Apply the mask to the temporary canvas context
-                // The clip() method uses the current path as a clipping region.
-                // It must be called BEFORE drawing the image for the clipping to apply.
+                tempCtx.save();
                 tempCtx.clip(maskPath);
-
-                // Draw the original image onto the temporary canvas.
-                // This image will now be clipped by the maskPath.
                 tempCtx.drawImage(originalImage, 0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.restore();
 
-                tempCtx.restore(); // Restore the state of the temporary context (removes the clip)
-
-                // Now, draw this masked temporary canvas onto the main canvas with shadow
-                ctx.save(); // Save the state of the main context for shadow properties
-
-                // Calculate shadow offsets based on distance and angle
+                ctx.save();
                 const shadowDistance = parseInt(shadowDistanceInput.value);
                 const shadowAngleDegrees = parseInt(shadowAngleInput.value);
-                // Convert angle to radians for Math.cos and Math.sin
-                const shadowAngleRadians = (shadowAngleDegrees - 180) * Math.PI / 180; // Subtract 180 to align with typical shadow direction
+                const shadowAngleRadians = (shadowAngleDegrees - 180) * Math.PI / 180;
+                const shadowOpacity = parseFloat(shadowOpacityInput.value); // Get shadow opacity
 
-                ctx.shadowColor = shadowColorInput.value;
+                // Convert hex shadow color to RGBA for opacity
+                ctx.shadowColor = hexToRgba(shadowColorInput.value, shadowOpacity);
                 ctx.shadowBlur = parseInt(shadowBlurInput.value);
                 ctx.shadowOffsetX = shadowDistance * Math.cos(shadowAngleRadians);
                 ctx.shadowOffsetY = shadowDistance * Math.sin(shadowAngleRadians);
                 
                 ctx.drawImage(tempCanvas, 0, 0);
-                ctx.restore(); // Restore the state of the main context (removes shadow properties)
+                ctx.restore();
 
                 // 3. Draw Outline for Masked Layer (if enabled)
                 if (enableOutlineInput.checked) {
                     ctx.save();
                     ctx.strokeStyle = outlineColorInput.value;
                     ctx.lineWidth = parseInt(outlineWidthInput.value);
-                    ctx.stroke(maskPath); // Stroke the mask path
+                    ctx.stroke(maskPath);
                     ctx.restore();
                 }
 
             } else {
-                // If no mask, draw the top layer as the original image (without shadow or outline)
                 ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
             }
 
             // If pen tool is active and drawing, draw the current path
             if (isPenToolActive && isDrawing && drawingPoints.length > 0) {
                 ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 10; // Keep drawing points thin for precision
                 ctx.beginPath();
                 ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
                 for (let i = 1; i < drawingPoints.length; i++) {
@@ -512,19 +517,17 @@ data-color="#FFFFFF">White</button>
                 }
                 ctx.stroke();
 
-                // Draw small circles at each point
                 ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
                 drawingPoints.forEach(p => {
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                    ctx.arc(p.x, p.y, 15, 0, Math.PI * 2); // Keep circles small
                     ctx.fill();
                 });
 
-                // Highlight the first point for closing the path
                 if (drawingPoints.length > 0) {
-                    ctx.fillStyle = 'rgba(0, 255, 0, 0.8)'; // Green for the first point
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                     ctx.beginPath();
-                    ctx.arc(drawingPoints[0].x, drawingPoints[0].y, 6, 0, Math.PI * 2);
+                    ctx.arc(drawingPoints[0].x, drawingPoints[0].y, 20, 0, Math.PI * 2); // Keep first point slightly larger
                     ctx.fill();
                 }
             }
@@ -532,7 +535,6 @@ data-color="#FFFFFF">White</button>
 
         // Event Listeners for Controls
 
-        // Image Upload
         imageUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -544,7 +546,6 @@ data-color="#FFFFFF">White</button>
             }
         });
 
-        // Overlay Controls
         overlayColorInput.addEventListener('input', () => {
             overlayHexValueSpan.textContent = overlayColorInput.value;
             draw();
@@ -554,7 +555,6 @@ data-color="#FFFFFF">White</button>
             draw();
         });
 
-        // Overlay Presets
         overlayPresetBtns.forEach(button => {
             button.addEventListener('click', () => {
                 const color = button.dataset.color;
@@ -564,8 +564,11 @@ data-color="#FFFFFF">White</button>
             });
         });
 
-        // Shadow Controls
         shadowColorInput.addEventListener('input', draw);
+        shadowOpacityInput.addEventListener('input', () => { // New event listener for shadow opacity
+            shadowOpacityValueSpan.textContent = parseFloat(shadowOpacityInput.value).toFixed(2);
+            draw();
+        });
         shadowBlurInput.addEventListener('input', () => {
             shadowBlurValueSpan.textContent = `${shadowBlurInput.value}px`;
             draw();
@@ -579,7 +582,6 @@ data-color="#FFFFFF">White</button>
             draw();
         });
 
-        // Pen Tool Activation
         activatePenToolBtn.addEventListener('click', () => {
             isPenToolActive = !isPenToolActive;
             if (isPenToolActive) {
@@ -591,13 +593,12 @@ data-color="#FFFFFF">White</button>
                 activatePenToolBtn.textContent = 'Activate Pen Tool';
                 activatePenToolBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
                 activatePenToolBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
-                isDrawing = false; // Stop drawing if deactivated mid-draw
+                isDrawing = false;
                 showMessage('Pen tool deactivated.', 'info');
             }
-            draw(); // Redraw to show/hide drawing indicators
+            draw();
         });
 
-        // Clear Mask
         clearMaskBtn.addEventListener('click', () => {
             drawingPoints = [];
             maskPath = null;
@@ -606,7 +607,6 @@ data-color="#FFFFFF">White</button>
             draw();
         });
 
-        // Outline Controls
         enableOutlineInput.addEventListener('change', draw);
         outlineColorInput.addEventListener('input', () => {
             outlineHexValueSpan.textContent = outlineColorInput.value;
@@ -617,7 +617,6 @@ data-color="#FFFFFF">White</button>
             draw();
         });
 
-        // Save as JPG functionality
         saveAsJpgBtn.addEventListener('click', () => {
             if (!isImageLoaded) {
                 showMessage('Please upload an image first!', 'error');
@@ -638,7 +637,6 @@ data-color="#FFFFFF">White</button>
             }
         });
 
-        // Reset All
         resetAllBtn.addEventListener('click', () => {
             initializeControls();
             drawingPoints = [];
@@ -648,11 +646,10 @@ data-color="#FFFFFF">White</button>
             activatePenToolBtn.textContent = 'Activate Pen Tool';
             activatePenToolBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
             activatePenToolBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
-            loadImage(defaultImageUrl); // Reload default image
+            loadImage(defaultImageUrl);
             showMessage('All settings reset!', 'success');
         });
 
-        // Canvas Mouse Events for Pen Tool
         canvas.addEventListener('mousedown', (e) => {
             if (!isPenToolActive || !isImageLoaded) return;
 
@@ -685,10 +682,8 @@ data-color="#FFFFFF">White</button>
             draw();
         });
 
-        // Redraw on window resize to ensure canvas scales correctly
         window.addEventListener('resize', draw);
 
-        // Initial setup
         window.onload = () => {
             initializeControls();
             loadImage(defaultImageUrl);
@@ -698,4 +693,3 @@ data-color="#FFFFFF">White</button>
     </script>
 </body>
 </html>
-
