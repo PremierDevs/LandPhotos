@@ -357,8 +357,7 @@
     let draggedNodeIndex = -1;
 
     // Disclaimer State
-    const disclaimerText = `Boundary lines are simply for perspective.\r
-    Buyers are encouraged to consult property survey.`;
+    const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
     let isDisclaimerVisible = false;
     let isDraggingDisclaimer = false;
     let disclaimerDragOffset = { x: 0, y: 0 };
@@ -410,42 +409,22 @@
             ty: (mouseY - panOffset.y) / zoomLevel,
         };
     }
-    
-    function getDisclaimerLines(context) {
-        const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
-        context.font = `bold ${scaledFontSize}px Inter`;
-        const maxWidth = canvas.width * disclaimerProps.maxWidthPercentage;
-        const words = disclaimerText.split(' ');
-        let lines = [];
-        let currentLine = words[0];
-        for (let i = 1; i < words.length; i++) {
-            let word = words[i];
-            let width = context.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) { currentLine += " " + word; } 
-            else { lines.push(currentLine); currentLine = word; }
+
+    function updateMaskFromPoints() {
+        if (maskPoints.length < 2) {
+            maskPath = null;
+            return;
         }
-        lines.push(currentLine);
-        return lines;
+        const path = new Path2D();
+        path.moveTo(maskPoints[0].x, maskPoints[0].y);
+        for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
+        path.closePath();
+        maskPath = path;
     }
 
-    function getDisclaimerBounds(context) {
-        if (!isDisclaimerVisible || !isImageLoaded) return null;
-        const lines = getDisclaimerLines(context);
-        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
-        const totalHeight = lines.length * scaledLineHeight;
-        const totalWidth = Math.max(...lines.map(line => context.measureText(line).width));
-        return {
-            x: disclaimerProps.x - totalWidth / 2,
-            y: disclaimerProps.y - scaledLineHeight,
-            width: totalWidth,
-            height: totalHeight
-        };
-    }
-    
     function getDisclaimerLines(context) {
         const scaledFontSize = disclaimerProps.fontSize * getPenToolScale();
         context.font = `bold ${scaledFontSize}px Inter`;
-        // Text wraps inside the box, considering padding
         const maxWidth = disclaimerProps.boxWidth - (disclaimerProps.padding * 2);
         
         const words = disclaimerText.split(' ');
@@ -454,7 +433,7 @@
         for (let i = 1; i < words.length; i++) {
             let word = words[i];
             let width = context.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) { currentLine += " " + word; } 
+            if (width < maxWidth && currentLine.length > 0) { currentLine += " " + word; } 
             else { lines.push(currentLine); currentLine = word; }
         }
         lines.push(currentLine);
@@ -486,11 +465,9 @@
         const bounds = getDisclaimerBounds(context);
         if (!bounds) return;
 
-        // Draw the semi-transparent bounding box
         context.fillStyle = 'rgba(0, 0, 0, 0.5)';
         context.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         
-        // Draw the text inside the box
         const scaledFontSize = disclaimerProps.fontSize * scale;
         const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * scale;
         const scaledPadding = disclaimerProps.padding * scale;
@@ -499,8 +476,8 @@
         context.textAlign = 'center';
         
         const lines = getDisclaimerLines(context);
-        let textY = bounds.y + scaledPadding + scaledLineHeight * 0.8; // Start drawing text with padding
-        const textX = bounds.x + bounds.width / 2; // Center of the box
+        let textY = bounds.y + scaledPadding + scaledLineHeight * 0.8;
+        const textX = bounds.x + bounds.width / 2;
 
         for (const line of lines) {
             context.fillText(line, textX, textY);
@@ -508,21 +485,8 @@
         }
     }
 
-    function updateMaskFromPoints() {
-        if (maskPoints.length < 2) {
-            maskPath = null;
-            return;
-        }
-        const path = new Path2D();
-        path.moveTo(maskPoints[0].x, maskPoints[0].y);
-        for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
-        path.closePath();
-        maskPath = path;
-    }
-
     // --- Core Functions ---
     function initializeControls() {
-        // ... all control resets
         overlayColorInput.value = defaultOverlayColor;
         overlayHexValueSpan.textContent = defaultOverlayColor;
         overlayOpacityInput.value = defaultOverlayOpacity;
@@ -643,10 +607,7 @@
             }
         }
 
-        // 3. Pen Tool Guides (for drawing or editing)
-        // ✨ BUG FIX: Define scale once, outside the if-statements.
         const scale = getPenToolScale();
-        
         if (isDrawing && drawingPoints.length > 0) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
@@ -712,7 +673,6 @@
         draw();
     });
 
-    // ✨ BUG FIX: Single, correct event listener for clearMaskBtn
     clearMaskBtn.addEventListener('click', () => {
         drawingPoints = [];
         maskPoints = [];
@@ -725,6 +685,7 @@
     enableOutlineInput.addEventListener('change', draw);
     outlineColorInput.addEventListener('input', () => { outlineHexValueSpan.textContent = outlineColorInput.value; draw(); });
     outlineWidthInput.addEventListener('input', () => { outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`; draw(); });
+    
     zoomSlider.addEventListener('input', (e) => {
         zoomLevel = parseFloat(e.target.value);
         zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
@@ -732,7 +693,9 @@
         canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
         draw();
     });
+
     resetViewBtn.addEventListener('click', () => { initializeControls(); draw(); });
+    
     applyCropBtn.addEventListener('click', () => {
         if (!isImageLoaded) return;
         const sX = -panOffset.x, sY = -panOffset.y, sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
@@ -744,6 +707,7 @@
         loadImage(tempCanvas.toDataURL());
         showMessage('Crop applied!', 'success');
     });
+    
     saveAsJpgBtn.addEventListener('click', () => {
         if (!isImageLoaded) { showMessage('Please upload an image first!', 'error'); return; }
         const link = document.createElement('a');
@@ -752,7 +716,8 @@
         link.click();
         showMessage('Image saved as JPG!', 'success');
     });
-     toggleDisclaimerBtn.addEventListener('click', () => {
+    
+    toggleDisclaimerBtn.addEventListener('click', () => {
         isDisclaimerVisible = !isDisclaimerVisible;
         if (isDisclaimerVisible) {
             disclaimerControls.classList.remove('hidden');
@@ -781,7 +746,6 @@
         draw();
     });
     
-    // ✨ NEW: Listener for the box width slider
     disclaimerBoxWidthSlider.addEventListener('input', (e) => {
         disclaimerProps.boxWidth = parseInt(e.target.value, 10);
         disclaimerBoxWidthValue.textContent = `${disclaimerProps.boxWidth}px`;
@@ -795,41 +759,37 @@
     });
 
     canvas.addEventListener('mousedown', (e) => {
-         const bounds = getDisclaimerBounds(ctx);
+        const pos = getMousePos(canvas, e);
+
+        const bounds = getDisclaimerBounds(ctx);
         if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
-            isDraggingDisclaimer = true; canvas.style.cursor = 'move';
-            disclaimerDragOffset.x = pos.tx - disclaimerProps.x;
-            disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
-            return;
-        }
-        if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
             isDraggingDisclaimer = true; canvas.style.cursor = 'move';
             disclaimerDragOffset.x = pos.tx - disclaimerProps.x; disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
             return;
         }
+
         if (isPenToolActive) {
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             for (let i = 0; i < maskPoints.length; i++) {
                 const node = maskPoints[i];
-                const distance = Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2));
-                if (distance < nodeRadius) {
+                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
                     isDraggingNode = true; draggedNodeIndex = i; canvas.style.cursor = 'grabbing';
                     return;
                 }
             }
         }
+        
         if (zoomLevel > 1 && !isPenToolActive) {
             isPanning = true; startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y }; canvas.style.cursor = 'grabbing';
             return;
         }
+        
         if (isPenToolActive) {
             if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; }
             isDrawing = true;
             if (drawingPoints.length > 0) {
                 const firstPoint = drawingPoints[0];
-                const distance = Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2));
-                const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * getPenToolScale();
-                if (distance < closeThreshold) {
+                if (Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2)) < BASE_PEN_CLOSE_THRESHOLD * getPenToolScale()) {
                     isDrawing = false; maskPoints = [...drawingPoints]; drawingPoints = []; updateMaskFromPoints();
                     showMessage('Mask applied!', 'success');
                 } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
@@ -839,12 +799,10 @@
     });
 
     canvas.addEventListener('mousemove', (e) => {
-         const pos = getMousePos(canvas, e);
+        const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
-            disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
-            disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
-            draw();
-            return;
+            disclaimerProps.x = pos.tx - disclaimerDragOffset.x; disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
+            draw(); return;
         }
         if (isDraggingNode) {
             maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
@@ -856,26 +814,34 @@
             panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x)); panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
             draw(); return;
         }
+
+        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        let cursorSet = false;
+        
         if (isPenToolActive && maskPoints.length > 0) {
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
-            let hoveringNode = false;
             for (const node of maskPoints) {
-                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) { hoveringNode = true; break; }
+                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
+                    newCursor = 'grab';
+                    cursorSet = true;
+                    break;
+                }
             }
-            canvas.style.cursor = hoveringNode ? 'grab' : 'crosshair';
         }
-         // Hover effect for disclaimer box
-        const bounds = getDisclaimerBounds(ctx);
-        if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
-            canvas.style.cursor = 'move';
-        } else if (!isDraggingNode && !isPanning) { // Don't override other cursors
-             canvas.style.cursor = isPenToolActive ? 'crosshair' : 'default';
+        
+        if (!cursorSet) {
+            const bounds = getDisclaimerBounds(ctx);
+            if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
+                newCursor = 'move';
+            }
         }
+        canvas.style.cursor = newCursor;
     });
 
     canvas.addEventListener('mouseup', () => {
         isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
-        canvas.style.cursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        canvas.style.cursor = newCursor;
     });
     
     canvas.addEventListener('mouseleave', () => {
@@ -895,7 +861,7 @@
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
     };
-</script>
+</script> 
 
 
 </body>
