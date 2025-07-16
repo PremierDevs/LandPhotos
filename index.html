@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graphics Manipulator</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -76,6 +75,7 @@
             height: auto; /* Maintain aspect ratio */
             display: block;
             margin: 0 auto; /* Center canvas */
+            cursor: default;
         }
         
         .control-group {
@@ -155,43 +155,6 @@
             transform: translateY(0);
             box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
         }
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position the tooltip above the text */
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip .tooltiptext::after {
-            content: "";
-            position: absolute;
-            top: 100%; /* At the bottom of the tooltip */
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -199,13 +162,11 @@
         <div class="sidebar">
             <h1 class="text-2xl font-bold text-gray-800 text-center mb-4">Image Editor Tools</h1>
 
-            <!-- Image Upload Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Image Source</h2>
                 <input type="file" id="imageUpload" accept="image/*" class="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
 
-            <!-- Color Overlay Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Color Overlay (Bottom Layer)</h2>
                 <div class="flex items-center gap-4 mb-3">
@@ -231,7 +192,6 @@
                 </div>
             </div>
 
-            <!-- Pen Tool Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Pen Tool (Top Layer Mask)</h2>
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -241,7 +201,6 @@
                 <p class="text-sm text-gray-500 mt-3">Click on the canvas to draw points. Click the first point to close the path.</p>
             </div>
 
-            <!-- Drop Shadow Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Drop Shadow (Top Layer)</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -265,15 +224,13 @@
                         <input type="range" id="shadowDistance" min="0" max="150" step="1" value="5" class="w-full">
                         <span id="shadowDistanceValue" class="block text-right text-gray-700 text-sm mt-1">5px</span>
                     </div>
-                    <div class="sm:col-span-2"> <!-- Span two columns for better layout -->
-                        <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
+                    <div class="sm:col-span-2"> <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
                         <input type="range" id="shadowAngle" min="0" max="360" step="1" value="45" class="w-full">
                         <span id="shadowAngleValue" class="block text-right text-gray-700 text-sm mt-1">45°</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Masked Layer Outline Panel -->
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Masked Layer Outline</h2>
                 <div class="flex items-center gap-2 mb-3">
@@ -291,8 +248,21 @@
                     <span id="outlineWidthValue" class="block text-right text-gray-700 text-sm mt-1">2px</span>
                 </div>
             </div>
+            
+            <div class="control-group">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Zoom & Crop</h2>
+                <div>
+                    <label for="zoomSlider" class="block text-gray-600 font-medium mb-1">Zoom:</label>
+                    <input type="range" id="zoomSlider" min="1" max="3" step="0.01" value="1" class="w-full">
+                    <span id="zoomValue" class="block text-right text-gray-700 text-sm mt-1">100%</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-3">When zoomed in, click and drag the image to pan.</p>
+                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                    <button id="applyCrop" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Apply Crop</button>
+                    <button id="resetView" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 active:bg-gray-700">Reset View</button>
+                </div>
+            </div>
 
-            <!-- Save and Reset Buttons -->
             <div class="flex flex-col gap-3 mt-4">
                 <button id="saveAsJpg" class="bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 active:bg-green-700 w-full">Save as JPG</button>
                 <button id="resetAll" class="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 active:bg-gray-400 w-full">Reset All</button>
@@ -300,30 +270,27 @@
         </div>
 
         <div class="main-content">
-            <canvas id="imageCanvas" class="w-full h-auto rounded-lg shadow-md"></canvas>
+            <canvas id="imageCanvas"></canvas>
             <div id="messageBox" class="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md hidden"></div>
         </div>
     </div>
 
-    <script>
+<script>
+    // --- DOM Element References ---
     const canvas = document.getElementById('imageCanvas');
     const ctx = canvas.getContext('2d');
     const messageBox = document.getElementById('messageBox');
-
     const imageUpload = document.getElementById('imageUpload');
     const overlayColorInput = document.getElementById('overlayColor');
     const overlayHexValueSpan = document.getElementById('overlayHexValue');
     const overlayOpacityInput = document.getElementById('overlayOpacity');
     const overlayOpacityValueSpan = document.getElementById('overlayOpacityValue');
-
     const overlayPresetBtns = document.querySelectorAll('.overlay-preset-btn');
-
     const activatePenToolBtn = document.getElementById('activatePenTool');
     const clearMaskBtn = document.getElementById('clearMask');
-
     const shadowColorInput = document.getElementById('shadowColor');
     const shadowHexValueSpan = document.getElementById('shadowHexValue');
-    const shadowOpacityInput = document.getElementById('shadowOpacity'); 
+    const shadowOpacityInput = document.getElementById('shadowOpacity');
     const shadowOpacityValueSpan = document.getElementById('shadowOpacityValue');
     const shadowBlurInput = document.getElementById('shadowBlur');
     const shadowBlurValueSpan = document.getElementById('shadowBlurValue');
@@ -331,46 +298,49 @@
     const shadowDistanceValueSpan = document.getElementById('shadowDistanceValue');
     const shadowAngleInput = document.getElementById('shadowAngle');
     const shadowAngleValueSpan = document.getElementById('shadowAngleValue');
-
     const enableOutlineInput = document.getElementById('enableOutline');
     const outlineColorInput = document.getElementById('outlineColor');
     const outlineHexValueSpan = document.getElementById('outlineHexValue');
     const outlineWidthInput = document.getElementById('outlineWidth');
     const outlineWidthValueSpan = document.getElementById('outlineWidthValue');
-
     const saveAsJpgBtn = document.getElementById('saveAsJpg');
     const resetAllBtn = document.getElementById('resetAll');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomValueSpan = document.getElementById('zoomValue');
+    const applyCropBtn = document.getElementById('applyCrop');
+    const resetViewBtn = document.getElementById('resetView');
 
+
+    // --- State Variables ---
     let originalImage = new Image();
     let isImageLoaded = false;
-
-    // Pen tool state
+    let maskPath = null;
     let isPenToolActive = false;
     let drawingPoints = [];
     let isDrawing = false;
-    let maskPath = null; 
+    
+    let zoomLevel = 1.0;
+    let panOffset = { x: 0, y: 0 };
+    let isPanning = false;
+    let startPanPoint = { x: 0, y: 0 };
 
-    // Default values
     const defaultOverlayColor = '#3b82f6';
     const defaultOverlayOpacity = 0.5;
     const defaultShadowColor = '#000000';
-    const defaultShadowOpacity = 0.75; 
+    const defaultShadowOpacity = 0.75;
     const defaultShadowBlur = 10;
     const defaultShadowDistance = 5;
     const defaultShadowAngle = 45;
     const defaultEnableOutline = false;
     const defaultOutlineColor = '#ffffff';
     const defaultOutlineWidth = 2;
+    const defaultImageUrl = 'https://placehold.co/700x500/A0B0C0/FFFFFF?text=Upload+Image';
+    const BASE_PEN_LINE_WIDTH = 3;
+    const BASE_PEN_POINT_RADIUS = 6;
+    const BASE_PEN_FIRST_POINT_RADIUS = 8;
+    const BASE_PEN_CLOSE_THRESHOLD = 12;
 
-    const defaultImageUrl = 'https://placehold.co/700x500/A0B0C0/FFFFFF?text=Upload+Image'; 
-
-    // ✨ NEW: Define base sizes for the pen tool for scaling
-    const BASE_PEN_LINE_WIDTH = 3;       // Base line thickness
-    const BASE_PEN_POINT_RADIUS = 6;     // Base radius for drawing points
-    const BASE_PEN_FIRST_POINT_RADIUS = 8; // Base radius for the starting point
-    const BASE_PEN_CLOSE_THRESHOLD = 12; // Base click distance to close the path
-
-    // Helper function to convert hex to RGBA
+    // --- Helper Functions ---
     function hexToRgba(hex, alpha) {
         let r = 0, g = 0, b = 0;
         if (hex.length === 4) {
@@ -384,43 +354,42 @@
         }
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
-
-    // ✨ NEW: Helper function to calculate the scaling factor for the pen tool
     function getPenToolScale() {
-        const referenceWidth = 700; // The width of the default placeholder image
+        const referenceWidth = 700;
         if (!isImageLoaded || !canvas.width) {
-            return 1; // Return a default scale of 1 if there's no image
+            return 1;
         }
-        // Calculate scale based on the current image's width relative to the reference
         return canvas.width / referenceWidth;
     }
 
-    // Initialize controls with default values
+    // --- Core Functions ---
     function initializeControls() {
         overlayColorInput.value = defaultOverlayColor;
         overlayHexValueSpan.textContent = defaultOverlayColor;
         overlayOpacityInput.value = defaultOverlayOpacity;
         overlayOpacityValueSpan.textContent = defaultOverlayOpacity.toFixed(2);
-
         shadowColorInput.value = defaultShadowColor;
         shadowHexValueSpan.textContent = defaultShadowColor;
-        shadowOpacityInput.value = defaultShadowOpacity; 
-        shadowOpacityValueSpan.textContent = defaultShadowOpacity.toFixed(2); 
+        shadowOpacityInput.value = defaultShadowOpacity;
+        shadowOpacityValueSpan.textContent = defaultShadowOpacity.toFixed(2);
         shadowBlurInput.value = defaultShadowBlur;
         shadowBlurValueSpan.textContent = `${defaultShadowBlur}px`;
         shadowDistanceInput.value = defaultShadowDistance;
         shadowDistanceValueSpan.textContent = `${defaultShadowDistance}px`;
         shadowAngleInput.value = defaultShadowAngle;
         shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
-
         enableOutlineInput.checked = defaultEnableOutline;
         outlineColorInput.value = defaultOutlineColor;
         outlineHexValueSpan.textContent = defaultOutlineColor;
         outlineWidthInput.value = defaultOutlineWidth;
         outlineWidthValueSpan.textContent = `${defaultOutlineWidth}px`;
+        
+        zoomSlider.value = 1.0;
+        zoomValueSpan.textContent = '100%';
+        zoomLevel = 1.0;
+        panOffset = { x: 0, y: 0 };
     }
 
-    // Function to display messages to the user
     function showMessage(message, type = 'info') {
         messageBox.textContent = message;
         messageBox.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
@@ -433,15 +402,15 @@
         }
         setTimeout(() => {
             messageBox.classList.add('hidden');
-        }, 3000); 
+        }, 3000);
     }
-
-    // Function to load the initial image
+    
     function loadImage(src) {
         originalImage.onload = () => {
             isImageLoaded = true;
             canvas.width = originalImage.width;
             canvas.height = originalImage.height;
+            initializeControls();
             draw();
             showMessage('Image loaded successfully!', 'success');
         };
@@ -453,7 +422,6 @@
         originalImage.src = src;
     }
 
-    // Main drawing function
     function draw() {
         if (!isImageLoaded) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -468,14 +436,16 @@
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+
+        ctx.translate(panOffset.x, panOffset.y);
+        ctx.scale(zoomLevel, zoomLevel);
 
         // 1. Draw Bottom Layer with Color Overlay
         ctx.save();
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-
         const overlayColor = overlayColorInput.value;
         const overlayOpacity = parseFloat(overlayOpacityInput.value);
-
         ctx.fillStyle = overlayColor;
         ctx.globalAlpha = overlayOpacity;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -487,7 +457,6 @@
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
             const tempCtx = tempCanvas.getContext('2d');
-
             tempCtx.save();
             tempCtx.clip(maskPath);
             tempCtx.drawImage(originalImage, 0, 0, tempCanvas.width, tempCanvas.height);
@@ -497,17 +466,14 @@
             const shadowDistance = parseInt(shadowDistanceInput.value);
             const shadowAngleDegrees = parseInt(shadowAngleInput.value);
             const shadowAngleRadians = (shadowAngleDegrees - 180) * Math.PI / 180;
-            const shadowOpacity = parseFloat(shadowOpacityInput.value); 
-
+            const shadowOpacity = parseFloat(shadowOpacityInput.value);
             ctx.shadowColor = hexToRgba(shadowColorInput.value, shadowOpacity);
             ctx.shadowBlur = parseInt(shadowBlurInput.value);
             ctx.shadowOffsetX = shadowDistance * Math.cos(shadowAngleRadians);
             ctx.shadowOffsetY = shadowDistance * Math.sin(shadowAngleRadians);
-            
             ctx.drawImage(tempCanvas, 0, 0);
             ctx.restore();
 
-            // 3. Draw Outline for Masked Layer (if enabled)
             if (enableOutlineInput.checked) {
                 ctx.save();
                 ctx.strokeStyle = outlineColorInput.value;
@@ -515,44 +481,39 @@
                 ctx.stroke(maskPath);
                 ctx.restore();
             }
-
         } else {
             ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         }
 
-        // ✨ MODIFIED: If pen tool is active, draw the path with scaled sizes
+        // 3. Draw Pen Tool guides
         if (isPenToolActive && isDrawing && drawingPoints.length > 0) {
-            const scale = getPenToolScale(); // Get the current scale factor
-
+            const scale = getPenToolScale();
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-            ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale; // Apply scaling
+            ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
             ctx.beginPath();
             ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
             for (let i = 1; i < drawingPoints.length; i++) {
                 ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y);
             }
             ctx.stroke();
-
-            // Draw scaled points
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
             drawingPoints.forEach(p => {
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); // Apply scaling
+                ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2);
                 ctx.fill();
             });
-
-            // Draw a scaled, larger point for the start of the path
             if (drawingPoints.length > 0) {
                 ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                 ctx.beginPath();
-                ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2); // Apply scaling
+                ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
+        
+        ctx.restore();
     }
 
-    // Event Listeners for Controls
-
+    // --- Event Listeners ---
     imageUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -563,7 +524,7 @@
             reader.readAsDataURL(file);
         }
     });
-
+    
     overlayColorInput.addEventListener('input', () => {
         overlayHexValueSpan.textContent = overlayColorInput.value;
         draw();
@@ -572,7 +533,6 @@
         overlayOpacityValueSpan.textContent = parseFloat(overlayOpacityInput.value).toFixed(2);
         draw();
     });
-
     overlayPresetBtns.forEach(button => {
         button.addEventListener('click', () => {
             const color = button.dataset.color;
@@ -581,7 +541,6 @@
             draw();
         });
     });
-
     shadowColorInput.addEventListener('input', () => {
         shadowHexValueSpan.textContent = shadowColorInput.value;
         draw();
@@ -602,7 +561,6 @@
         shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`;
         draw();
     });
-
     activatePenToolBtn.addEventListener('click', () => {
         isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
@@ -619,7 +577,6 @@
         }
         draw();
     });
-
     clearMaskBtn.addEventListener('click', () => {
         drawingPoints = [];
         maskPath = null;
@@ -627,7 +584,6 @@
         showMessage('Mask cleared!', 'success');
         draw();
     });
-
     enableOutlineInput.addEventListener('change', draw);
     outlineColorInput.addEventListener('input', () => {
         outlineHexValueSpan.textContent = outlineColorInput.value;
@@ -638,13 +594,52 @@
         draw();
     });
 
+    zoomSlider.addEventListener('input', (e) => {
+        zoomLevel = parseFloat(e.target.value);
+        zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
+        if (zoomLevel === 1) {
+            panOffset = { x: 0, y: 0 };
+        }
+        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        draw();
+    });
+
+    resetViewBtn.addEventListener('click', () => {
+        initializeControls();
+        draw();
+    });
+
+    applyCropBtn.addEventListener('click', () => {
+        if (!isImageLoaded) return;
+
+        const sourceX = -panOffset.x;
+        const sourceY = -panOffset.y;
+        const sourceWidth = canvas.width / zoomLevel;
+        const sourceHeight = canvas.height / zoomLevel;
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = sourceWidth;
+        tempCanvas.height = sourceHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        tempCtx.drawImage(
+            originalImage,
+            sourceX, sourceY, sourceWidth, sourceHeight,
+            0, 0, sourceWidth, sourceHeight
+        );
+        
+        clearMaskBtn.click();
+        loadImage(tempCanvas.toDataURL());
+        showMessage('Crop applied successfully!', 'success');
+    });
+    
     saveAsJpgBtn.addEventListener('click', () => {
         if (!isImageLoaded) {
             showMessage('Please upload an image first!', 'error');
             return;
         }
         try {
-            const imageDataURL = canvas.toDataURL('image/jpeg', 0.9); 
+            const imageDataURL = canvas.toDataURL('image/jpeg', 0.9);
             const link = document.createElement('a');
             link.href = imageDataURL;
             link.download = 'graphics_manipulated.jpg';
@@ -658,8 +653,75 @@
         }
     });
 
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        
+        if (zoomLevel > 1 && !isPenToolActive) {
+            isPanning = true;
+            startPanPoint = { x: mouseX - panOffset.x, y: mouseY - panOffset.y };
+            canvas.style.cursor = 'grabbing';
+            return; // Prioritize panning over pen tool when zoomed
+        }
+
+        if (isPenToolActive) {
+            const transformedX = (mouseX - panOffset.x) / zoomLevel;
+            const transformedY = (mouseY - panOffset.y) / zoomLevel;
+            
+            if (!isDrawing) {
+                isDrawing = true;
+                drawingPoints.push({ x: transformedX, y: transformedY });
+            } else {
+                const firstPoint = drawingPoints[0];
+                const distance = Math.sqrt(Math.pow(transformedX - firstPoint.x, 2) + Math.pow(transformedY - firstPoint.y, 2));
+                const scale = getPenToolScale();
+                const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * scale;
+
+                if (distance < closeThreshold) {
+                    isDrawing = false;
+                    const path = new Path2D();
+                    path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+                    for (let i = 1; i < drawingPoints.length; i++) {
+                        path.lineTo(drawingPoints[i].x, drawingPoints[i].y);
+                    }
+                    path.closePath();
+                    maskPath = path;
+                    drawingPoints = [];
+                    showMessage('Mask applied!', 'success');
+                } else {
+                    drawingPoints.push({ x: transformedX, y: transformedY });
+                }
+            }
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        panOffset.x = mouseX - startPanPoint.x;
+        panOffset.y = mouseY - startPanPoint.y;
+        const maxPanX = (canvas.width * zoomLevel - canvas.width);
+        const maxPanY = (canvas.height * zoomLevel - canvas.height);
+        panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
+        panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+        draw();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isPanning = false;
+        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+        isPanning = false;
+        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+    });
+
     resetAllBtn.addEventListener('click', () => {
-        initializeControls();
         drawingPoints = [];
         maskPath = null;
         isDrawing = false;
@@ -667,58 +729,20 @@
         activatePenToolBtn.textContent = 'Activate Pen Tool';
         activatePenToolBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
         activatePenToolBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
+        
         loadImage(defaultImageUrl);
         showMessage('All settings reset!', 'success');
     });
 
-    canvas.addEventListener('mousedown', (e) => {
-        if (!isPenToolActive || !isImageLoaded) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-
-        if (!isDrawing && drawingPoints.length === 0) {
-            isDrawing = true;
-            drawingPoints.push({ x, y });
-        } else if (isDrawing) {
-            const firstPoint = drawingPoints[0];
-            const distance = Math.sqrt(Math.pow(x - firstPoint.x, 2) + Math.pow(y - firstPoint.y, 2));
-
-            // ✨ MODIFIED: Use the scaled threshold for closing the path
-            const scale = getPenToolScale();
-            const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * scale;
-
-            if (distance < closeThreshold) { // Use scaled value
-                isDrawing = false;
-                const path = new Path2D();
-                path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-                for (let i = 1; i < drawingPoints.length; i++) {
-                    path.lineTo(drawingPoints[i].x, drawingPoints[i].y);
-                }
-                path.closePath();
-                maskPath = path;
-                drawingPoints = [];
-                showMessage('Mask applied!', 'success');
-            } else {
-                drawingPoints.push({ x, y });
-            }
-        }
-        draw();
-    });
-
-    window.addEventListener('resize', () => {
-        // Redraw on resize, which helps if the layout changes responsively
-        draw();
-    });
+    window.addEventListener('resize', draw);
 
     window.onload = () => {
         initializeControls();
         loadImage(defaultImageUrl);
-        // Ensure canvas display size fits the container
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
     };
 </script>
+
 </body>
 </html>
