@@ -259,7 +259,7 @@
                 </div>
             </div>
 
-            <div class="control-group">
+           <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Disclaimer Text</h2>
                 <div class="flex flex-col gap-3">
                     <button id="toggleDisclaimer" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Add Disclaimer</button>
@@ -269,6 +269,11 @@
                         <label for="disclaimerFontSize" class="block text-gray-600 font-medium mb-1">Font Size:</label>
                         <input type="range" id="disclaimerFontSize" min="12" max="72" step="1" value="24" class="w-full">
                         <span id="disclaimerFontSizeValue" class="block text-right text-gray-700 text-sm mt-1">24px</span>
+                    </div>
+                    <div>
+                        <label for="disclaimerBoxWidth" class="block text-gray-600 font-medium mb-1">Box Width:</label>
+                        <input type="range" id="disclaimerBoxWidth" min="100" max="1000" step="10" value="500" class="w-full">
+                        <span id="disclaimerBoxWidthValue" class="block text-right text-gray-700 text-sm mt-1">500px</span>
                     </div>
                     <div class="flex items-center gap-4">
                         <label for="disclaimerColor" class="text-gray-600 font-medium">Color:</label>
@@ -330,6 +335,9 @@
     const disclaimerFontSizeValue = document.getElementById('disclaimerFontSizeValue');
     const disclaimerColorInput = document.getElementById('disclaimerColor');
     const disclaimerHexValue = document.getElementById('disclaimerHexValue');
+    const disclaimerBoxWidthSlider = document.getElementById('disclaimerBoxWidth');
+    const disclaimerBoxWidthValue = document.getElementById('disclaimerBoxWidthValue');
+
 
     // --- State Variables ---
     let originalImage = new Image();
@@ -354,7 +362,13 @@
     let isDisclaimerVisible = false;
     let isDraggingDisclaimer = false;
     let disclaimerDragOffset = { x: 0, y: 0 };
-    let disclaimerProps = { x: 0, y: 0, fontSize: 24, color: '#FFFFFF', lineHeight: 28, maxWidthPercentage: 0.9 };
+    let disclaimerProps = {
+        x: 50, y: 50,
+        boxWidth: 500,
+        padding: 15,
+        fontSize: 24,
+        color: '#FFFFFF',
+    };
     
     // Constants and Defaults
     const defaultOverlayColor = '#3b82f6';
@@ -428,18 +442,69 @@
         };
     }
     
-    function drawDisclaimer(context) {
+    function getDisclaimerLines(context) {
+        const scaledFontSize = disclaimerProps.fontSize * getPenToolScale();
+        context.font = `bold ${scaledFontSize}px Inter`;
+        // Text wraps inside the box, considering padding
+        const maxWidth = disclaimerProps.boxWidth - (disclaimerProps.padding * 2);
+        
+        const words = disclaimerText.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = context.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) { currentLine += " " + word; } 
+            else { lines.push(currentLine); currentLine = word; }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
+    function getDisclaimerBounds(context) {
+        if (!isDisclaimerVisible || !isImageLoaded) return null;
+        
+        const lines = getDisclaimerLines(context);
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * getPenToolScale();
+        const scaledPadding = disclaimerProps.padding * getPenToolScale();
+        const totalTextHeight = lines.length * scaledLineHeight;
+        
+        const boxHeight = totalTextHeight + (scaledPadding * 2);
+        
+        return {
+            x: disclaimerProps.x,
+            y: disclaimerProps.y,
+            width: disclaimerProps.boxWidth,
+            height: boxHeight,
+        };
+    }
+    
+    function drawDisclaimerAndBox(context) {
         if (!isDisclaimerVisible) return;
-        const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
-        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
+        
+        const scale = getPenToolScale();
+        const bounds = getDisclaimerBounds(context);
+        if (!bounds) return;
+
+        // Draw the semi-transparent bounding box
+        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        context.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        
+        // Draw the text inside the box
+        const scaledFontSize = disclaimerProps.fontSize * scale;
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * scale;
+        const scaledPadding = disclaimerProps.padding * scale;
         context.font = `bold ${scaledFontSize}px Inter`;
         context.fillStyle = disclaimerProps.color;
         context.textAlign = 'center';
+        
         const lines = getDisclaimerLines(context);
-        let y = disclaimerProps.y;
+        let textY = bounds.y + scaledPadding + scaledLineHeight * 0.8; // Start drawing text with padding
+        const textX = bounds.x + bounds.width / 2; // Center of the box
+
         for (const line of lines) {
-            context.fillText(line, disclaimerProps.x, y);
-            y += scaledLineHeight;
+            context.fillText(line, textX, textY);
+            textY += scaledLineHeight;
         }
     }
 
@@ -487,13 +552,19 @@
         disclaimerControls.classList.add('hidden');
         toggleDisclaimerBtn.textContent = 'Add Disclaimer';
         toggleDisclaimerBtn.classList.replace('bg-red-500', 'bg-blue-500');
+        
+        disclaimerProps.fontSize = 24;
         disclaimerFontSizeSlider.value = 24;
         disclaimerFontSizeValue.textContent = '24px';
+        
+        disclaimerProps.color = '#FFFFFF';
         disclaimerColorInput.value = '#FFFFFF';
         disclaimerHexValue.textContent = '#FFFFFF';
-        disclaimerProps.fontSize = 24;
-        disclaimerProps.lineHeight = 28;
-        disclaimerProps.color = '#FFFFFF';
+        
+        disclaimerProps.boxWidth = 500;
+        disclaimerBoxWidthSlider.max = canvas.width || 1000;
+        disclaimerBoxWidthSlider.value = 500;
+        disclaimerBoxWidthValue.textContent = '500px';
     }
 
     function showMessage(message, type = 'info') {
@@ -605,7 +676,7 @@
             maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
         }
         
-        drawDisclaimer(ctx);
+        drawDisclaimerAndBox(ctx);
         ctx.restore();
     }
 
@@ -681,14 +752,21 @@
         link.click();
         showMessage('Image saved as JPG!', 'success');
     });
-    toggleDisclaimerBtn.addEventListener('click', () => {
+     toggleDisclaimerBtn.addEventListener('click', () => {
         isDisclaimerVisible = !isDisclaimerVisible;
         if (isDisclaimerVisible) {
             disclaimerControls.classList.remove('hidden');
             toggleDisclaimerBtn.textContent = 'Remove Disclaimer';
             toggleDisclaimerBtn.classList.replace('bg-blue-500', 'bg-red-500');
-            disclaimerProps.x = canvas.width / 2;
-            disclaimerProps.y = canvas.height - (disclaimerProps.lineHeight * 3 * (canvas.width / 700));
+            
+            const initialWidth = canvas.width * 0.8;
+            disclaimerProps.boxWidth = initialWidth;
+            disclaimerBoxWidthSlider.max = canvas.width;
+            disclaimerBoxWidthSlider.value = initialWidth;
+            disclaimerBoxWidthValue.textContent = `${Math.round(initialWidth)}px`;
+
+            disclaimerProps.x = (canvas.width - initialWidth) / 2;
+            disclaimerProps.y = canvas.height * 0.75;
         } else {
             disclaimerControls.classList.add('hidden');
             toggleDisclaimerBtn.textContent = 'Add Disclaimer';
@@ -696,12 +774,20 @@
         }
         draw();
     });
+
     disclaimerFontSizeSlider.addEventListener('input', (e) => {
-        const size = parseInt(e.target.value, 10);
-        disclaimerProps.fontSize = size;
-        disclaimerFontSizeValue.textContent = `${size}px`;
+        disclaimerProps.fontSize = parseInt(e.target.value, 10);
+        disclaimerFontSizeValue.textContent = `${disclaimerProps.fontSize}px`;
         draw();
     });
+    
+    // ✨ NEW: Listener for the box width slider
+    disclaimerBoxWidthSlider.addEventListener('input', (e) => {
+        disclaimerProps.boxWidth = parseInt(e.target.value, 10);
+        disclaimerBoxWidthValue.textContent = `${disclaimerProps.boxWidth}px`;
+        draw();
+    });
+
     disclaimerColorInput.addEventListener('input', (e) => {
         disclaimerProps.color = e.target.value;
         disclaimerHexValue.textContent = e.target.value;
@@ -709,8 +795,13 @@
     });
 
     canvas.addEventListener('mousedown', (e) => {
-        const pos = getMousePos(canvas, e);
-        const bounds = getDisclaimerBounds(ctx);
+         const bounds = getDisclaimerBounds(ctx);
+        if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
+            isDraggingDisclaimer = true; canvas.style.cursor = 'move';
+            disclaimerDragOffset.x = pos.tx - disclaimerProps.x;
+            disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
+            return;
+        }
         if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
             isDraggingDisclaimer = true; canvas.style.cursor = 'move';
             disclaimerDragOffset.x = pos.tx - disclaimerProps.x; disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
@@ -748,10 +839,12 @@
     });
 
     canvas.addEventListener('mousemove', (e) => {
-        const pos = getMousePos(canvas, e);
+         const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
-            disclaimerProps.x = pos.tx - disclaimerDragOffset.x; disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
-            draw(); return;
+            disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
+            disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
+            draw();
+            return;
         }
         if (isDraggingNode) {
             maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
@@ -770,6 +863,13 @@
                 if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) { hoveringNode = true; break; }
             }
             canvas.style.cursor = hoveringNode ? 'grab' : 'crosshair';
+        }
+         // Hover effect for disclaimer box
+        const bounds = getDisclaimerBounds(ctx);
+        if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
+            canvas.style.cursor = 'move';
+        } else if (!isDraggingNode && !isPanning) { // Don't override other cursors
+             canvas.style.cursor = isPenToolActive ? 'crosshair' : 'default';
         }
     });
 
