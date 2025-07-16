@@ -334,26 +334,28 @@
     // --- State Variables ---
     let originalImage = new Image();
     let isImageLoaded = false;
-    let maskPath = null;
     let isPenToolActive = false;
-    let drawingPoints = [];
-    let isDrawing = false;
     let zoomLevel = 1.0;
     let panOffset = { x: 0, y: 0 };
     let isPanning = false;
     let startPanPoint = { x: 0, y: 0 };
+    
+    // Pen Tool State
+    let maskPath = null;
+    let drawingPoints = [];
+    let maskPoints = [];
+    let isDrawing = false;
+    let isDraggingNode = false;
+    let draggedNodeIndex = -1;
+
+    // Disclaimer State
     const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
     let isDisclaimerVisible = false;
     let isDraggingDisclaimer = false;
     let disclaimerDragOffset = { x: 0, y: 0 };
-    let disclaimerProps = {
-        x: 0, y: 0,
-        fontSize: 24,
-        color: '#FFFFFF',
-        lineHeight: 28,
-        maxWidthPercentage: 0.9
-    };
-
+    let disclaimerProps = { x: 0, y: 0, fontSize: 24, color: '#FFFFFF', lineHeight: 28, maxWidthPercentage: 0.9 };
+    
+    // Constants and Defaults
     const defaultOverlayColor = '#3b82f6';
     const defaultOverlayOpacity = 0.5;
     const defaultShadowColor = '#000000';
@@ -373,49 +375,25 @@
     // --- Helper Functions ---
     function hexToRgba(hex, alpha) {
         let r = 0, g = 0, b = 0;
-        if (hex.length === 4) {
-            r = parseInt(hex[1] + hex[1], 16);
-            g = parseInt(hex[2] + hex[2], 16);
-            b = parseInt(hex[3] + hex[3], 16);
-        } else if (hex.length === 7) {
-            r = parseInt(hex.substring(1, 3), 16);
-            g = parseInt(hex.substring(3, 5), 16);
-            b = parseInt(hex.substring(5, 7), 16);
-        }
+        if (hex.length === 4) { r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16); } 
+        else if (hex.length === 7) { r = parseInt(hex.substring(1, 3), 16); g = parseInt(hex.substring(3, 5), 16); b = parseInt(hex.substring(5, 7), 16); }
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function getPenToolScale() {
-        const referenceWidth = 700;
         if (!isImageLoaded || !canvas.width) { return 1; }
-        return canvas.width / referenceWidth;
+        return canvas.width / 700;
     }
 
-    // ✨ REFACTORED: Central function to get mouse coordinates
     function getMousePos(canvasEl, event) {
         const rect = canvasEl.getBoundingClientRect();
         const mouseX = (event.clientX - rect.left) * (canvasEl.width / rect.width);
         const mouseY = (event.clientY - rect.top) * (canvasEl.height / rect.height);
         return {
-            x: mouseX,
-            y: mouseY,
+            x: mouseX, y: mouseY,
             tx: (mouseX - panOffset.x) / zoomLevel,
             ty: (mouseY - panOffset.y) / zoomLevel,
         };
-    }
-
-    function updateMaskFromPoints() {
-        if (maskPoints.length < 2) {
-            maskPath = null;
-            return;
-        }
-        const path = new Path2D();
-        path.moveTo(maskPoints[0].x, maskPoints[0].y);
-        for (let i = 1; i < maskPoints.length; i++) {
-            path.lineTo(maskPoints[i].x, maskPoints[i].y);
-        }
-        path.closePath();
-        maskPath = path;
     }
     
     function getDisclaimerLines(context) {
@@ -428,12 +406,8 @@
         for (let i = 1; i < words.length; i++) {
             let word = words[i];
             let width = context.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) {
-                currentLine += " " + word;
-            } else {
-                lines.push(currentLine);
-                currentLine = word;
-            }
+            if (width < maxWidth) { currentLine += " " + word; } 
+            else { lines.push(currentLine); currentLine = word; }
         }
         lines.push(currentLine);
         return lines;
@@ -460,7 +434,6 @@
         context.font = `bold ${scaledFontSize}px Inter`;
         context.fillStyle = disclaimerProps.color;
         context.textAlign = 'center';
-        
         const lines = getDisclaimerLines(context);
         let y = disclaimerProps.y;
         for (const line of lines) {
@@ -469,8 +442,21 @@
         }
     }
 
+    function updateMaskFromPoints() {
+        if (maskPoints.length < 2) {
+            maskPath = null;
+            return;
+        }
+        const path = new Path2D();
+        path.moveTo(maskPoints[0].x, maskPoints[0].y);
+        for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
+        path.closePath();
+        maskPath = path;
+    }
+
     // --- Core Functions ---
     function initializeControls() {
+        // ... all control resets
         overlayColorInput.value = defaultOverlayColor;
         overlayHexValueSpan.textContent = defaultOverlayColor;
         overlayOpacityInput.value = defaultOverlayOpacity;
@@ -482,7 +468,6 @@
         shadowBlurInput.value = defaultShadowBlur;
         shadowBlurValueSpan.textContent = `${defaultShadowBlur}px`;
         shadowDistanceInput.value = defaultShadowDistance;
-        // ✨ BUG FIX: Use correct variable name
         shadowDistanceValueSpan.textContent = `${defaultShadowDistance}px`;
         shadowAngleInput.value = defaultShadowAngle;
         shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
@@ -513,16 +498,10 @@
     function showMessage(message, type = 'info') {
         messageBox.textContent = message;
         messageBox.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
-        if (type === 'info') {
-            messageBox.classList.add('bg-blue-100', 'text-blue-800');
-        } else if (type === 'error') {
-            messageBox.classList.add('bg-red-100', 'text-red-800');
-        } else if (type === 'success') {
-            messageBox.classList.add('bg-green-100', 'text-green-800');
-        }
-        setTimeout(() => {
-            messageBox.classList.add('hidden');
-        }, 3000);
+        if (type === 'info') { messageBox.classList.add('bg-blue-100', 'text-blue-800'); } 
+        else if (type === 'error') { messageBox.classList.add('bg-red-100', 'text-red-800'); } 
+        else if (type === 'success') { messageBox.classList.add('bg-green-100', 'text-green-800'); }
+        setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
     }
     
     function loadImage(src) {
@@ -561,11 +540,10 @@
         ctx.scale(zoomLevel, zoomLevel);
 
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-        const overlayColor = overlayColorInput.value;
-        const overlayOpacity = parseFloat(overlayOpacityInput.value);
-        ctx.fillStyle = overlayColor;
-        ctx.globalAlpha = overlayOpacity;
+        ctx.fillStyle = overlayColorInput.value;
+        ctx.globalAlpha = parseFloat(overlayOpacityInput.value);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
 
         if (maskPath) {
             const tempCanvas = document.createElement('canvas');
@@ -576,19 +554,14 @@
             tempCtx.clip(maskPath);
             tempCtx.drawImage(originalImage, 0, 0, tempCanvas.width, tempCanvas.height);
             tempCtx.restore();
-
             ctx.save();
-            const shadowDistance = parseInt(shadowDistanceInput.value);
-            const shadowAngleDegrees = parseInt(shadowAngleInput.value);
-            const shadowAngleRadians = (shadowAngleDegrees - 180) * Math.PI / 180;
-            const shadowOpacity = parseFloat(shadowOpacityInput.value);
-            ctx.shadowColor = hexToRgba(shadowColorInput.value, shadowOpacity);
+            const sd = parseInt(shadowDistanceInput.value), sa = (parseInt(shadowAngleInput.value) - 180) * Math.PI / 180;
+            ctx.shadowColor = hexToRgba(shadowColorInput.value, parseFloat(shadowOpacityInput.value));
             ctx.shadowBlur = parseInt(shadowBlurInput.value);
-            ctx.shadowOffsetX = shadowDistance * Math.cos(shadowAngleRadians);
-            ctx.shadowOffsetY = shadowDistance * Math.sin(shadowAngleRadians);
+            ctx.shadowOffsetX = sd * Math.cos(sa);
+            ctx.shadowOffsetY = sd * Math.sin(sa);
             ctx.drawImage(tempCanvas, 0, 0);
             ctx.restore();
-
             if (enableOutlineInput.checked) {
                 ctx.save();
                 ctx.strokeStyle = outlineColorInput.value;
@@ -598,22 +571,19 @@
             }
         }
 
-        if (isPenToolActive && isDrawing && drawingPoints.length > 0) {
-            const scale = getPenToolScale();
+        // 3. Pen Tool Guides (for drawing or editing)
+        // ✨ BUG FIX: Define scale once, outside the if-statements.
+        const scale = getPenToolScale();
+        
+        if (isDrawing && drawingPoints.length > 0) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
             ctx.beginPath();
             ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-            for (let i = 1; i < drawingPoints.length; i++) {
-                ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y);
-            }
+            for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
             ctx.stroke();
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-            drawingPoints.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
             if (drawingPoints.length > 0) {
                 ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                 ctx.beginPath();
@@ -621,8 +591,8 @@
                 ctx.fill();
             }
         }
-
-         if (isPenToolActive && maskPoints.length > 0) {
+        
+        if (isPenToolActive && maskPoints.length > 0) {
             ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
             ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
             ctx.beginPath();
@@ -630,27 +600,20 @@
             for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
             ctx.closePath();
             ctx.stroke();
-            
             ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
             maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
         }
         
         drawDisclaimer(ctx);
-
         ctx.restore();
     }
 
     // --- Event Listeners ---
     imageUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => loadImage(event.target.result);
-            reader.readAsDataURL(file);
-        }
+        if (file) { const reader = new FileReader(); reader.onload = (event) => loadImage(event.target.result); reader.readAsDataURL(file); }
     });
     
-    // All other control event listeners
     overlayColorInput.addEventListener('input', () => { overlayHexValueSpan.textContent = overlayColorInput.value; draw(); });
     overlayOpacityInput.addEventListener('input', () => { overlayOpacityValueSpan.textContent = parseFloat(overlayOpacityInput.value).toFixed(2); draw(); });
     overlayPresetBtns.forEach(button => { button.addEventListener('click', () => { const color = button.dataset.color; overlayColorInput.value = color; overlayHexValueSpan.textContent = color; draw(); }); });
@@ -659,25 +622,34 @@
     shadowBlurInput.addEventListener('input', () => { shadowBlurValueSpan.textContent = `${shadowBlurInput.value}px`; draw(); });
     shadowDistanceInput.addEventListener('input', () => { shadowDistanceValueSpan.textContent = `${shadowDistanceInput.value}px`; draw(); });
     shadowAngleInput.addEventListener('input', () => { shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`; draw(); });
+    
     activatePenToolBtn.addEventListener('click', () => {
         isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
             activatePenToolBtn.textContent = 'Deactivate Pen Tool';
             activatePenToolBtn.classList.replace('bg-blue-500', 'bg-orange-500');
             showMessage('Pen tool activated.', 'info');
+            canvas.style.cursor = 'crosshair';
         } else {
             activatePenToolBtn.textContent = 'Activate Pen Tool';
             activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
             isDrawing = false;
             showMessage('Pen tool deactivated.', 'info');
+            canvas.style.cursor = 'default';
         }
         draw();
     });
+
+    // ✨ BUG FIX: Single, correct event listener for clearMaskBtn
     clearMaskBtn.addEventListener('click', () => {
-        drawingPoints = []; maskPath = null; isDrawing = false;
+        drawingPoints = [];
+        maskPoints = [];
+        maskPath = null;
+        isDrawing = false;
         showMessage('Mask cleared!', 'success');
         draw();
     });
+
     enableOutlineInput.addEventListener('change', draw);
     outlineColorInput.addEventListener('input', () => { outlineHexValueSpan.textContent = outlineColorInput.value; draw(); });
     outlineWidthInput.addEventListener('input', () => { outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`; draw(); });
@@ -691,8 +663,7 @@
     resetViewBtn.addEventListener('click', () => { initializeControls(); draw(); });
     applyCropBtn.addEventListener('click', () => {
         if (!isImageLoaded) return;
-        const sX = -panOffset.x, sY = -panOffset.y;
-        const sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
+        const sX = -panOffset.x, sY = -panOffset.y, sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = sW; tempCanvas.height = sH;
         const tempCtx = tempCanvas.getContext('2d');
@@ -736,79 +707,41 @@
         draw();
     });
 
-    clearMaskBtn.addEventListener('click', () => {
-        drawingPoints = [];
-        maskPoints = [];
-        maskPath = null;
-        isDrawing = false;
-        showMessage('Mask cleared!', 'success');
-        draw();
-    });
-
-    // ✨ MODIFIED: Mouse events now handle node dragging
     canvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(canvas, e);
-        
-        // Priority 1: Disclaimer Drag
         const bounds = getDisclaimerBounds(ctx);
         if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
-            isDraggingDisclaimer = true;
-            canvas.style.cursor = 'move';
-            disclaimerDragOffset.x = pos.tx - disclaimerProps.x;
-            disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
+            isDraggingDisclaimer = true; canvas.style.cursor = 'move';
+            disclaimerDragOffset.x = pos.tx - disclaimerProps.x; disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
             return;
         }
-
         if (isPenToolActive) {
-            // Priority 2: Node Drag
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             for (let i = 0; i < maskPoints.length; i++) {
                 const node = maskPoints[i];
                 const distance = Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2));
                 if (distance < nodeRadius) {
-                    isDraggingNode = true;
-                    draggedNodeIndex = i;
-                    canvas.style.cursor = 'grabbing';
+                    isDraggingNode = true; draggedNodeIndex = i; canvas.style.cursor = 'grabbing';
                     return;
                 }
             }
         }
-
-        // Priority 3: Panning
         if (zoomLevel > 1 && !isPenToolActive) {
-            isPanning = true;
-            startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
-            canvas.style.cursor = 'grabbing';
+            isPanning = true; startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y }; canvas.style.cursor = 'grabbing';
             return;
         }
-        
-        // Priority 4: Drawing new pen path
         if (isPenToolActive) {
-            // If starting a new drawing, clear any existing mask
-            if (!isDrawing) {
-                maskPoints = [];
-                maskPath = null;
-                drawingPoints = [];
-            }
-
+            if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; }
             isDrawing = true;
             if (drawingPoints.length > 0) {
                 const firstPoint = drawingPoints[0];
                 const distance = Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2));
                 const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * getPenToolScale();
-                
-                if (distance < closeThreshold) { // Close the path
-                    isDrawing = false;
-                    maskPoints = [...drawingPoints];
-                    drawingPoints = [];
-                    updateMaskFromPoints();
+                if (distance < closeThreshold) {
+                    isDrawing = false; maskPoints = [...drawingPoints]; drawingPoints = []; updateMaskFromPoints();
                     showMessage('Mask applied!', 'success');
-                } else {
-                    drawingPoints.push({ x: pos.tx, y: pos.ty });
-                }
-            } else {
-                drawingPoints.push({ x: pos.tx, y: pos.ty });
-            }
+                } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
+            } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
         }
         draw();
     });
@@ -816,57 +749,37 @@
     canvas.addEventListener('mousemove', (e) => {
         const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
-            disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
-            disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
-            draw();
-            return;
+            disclaimerProps.x = pos.tx - disclaimerDragOffset.x; disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
+            draw(); return;
         }
         if (isDraggingNode) {
-            maskPoints[draggedNodeIndex].x = pos.tx;
-            maskPoints[draggedNodeIndex].y = pos.ty;
-            updateMaskFromPoints();
-            draw();
-            return;
+            maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
+            updateMaskFromPoints(); draw(); return;
         }
         if (isPanning) {
-            panOffset.x = pos.x - startPanPoint.x;
-            panOffset.y = pos.y - startPanPoint.y;
-            const maxPanX = (canvas.width * zoomLevel - canvas.width);
-            const maxPanY = (canvas.height * zoomLevel - canvas.height);
-            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
-            panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
-            draw();
-            return;
+            panOffset.x = pos.x - startPanPoint.x; panOffset.y = pos.y - startPanPoint.y;
+            const maxPanX = (canvas.width * zoomLevel - canvas.width), maxPanY = (canvas.height * zoomLevel - canvas.height);
+            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x)); panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+            draw(); return;
         }
-
-        // Hover effect for nodes
         if (isPenToolActive && maskPoints.length > 0) {
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             let hoveringNode = false;
             for (const node of maskPoints) {
-                const distance = Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2));
-                if (distance < nodeRadius) {
-                    hoveringNode = true;
-                    break;
-                }
+                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) { hoveringNode = true; break; }
             }
             canvas.style.cursor = hoveringNode ? 'grab' : 'crosshair';
         }
     });
 
     canvas.addEventListener('mouseup', () => {
-        isPanning = false;
-        isDraggingDisclaimer = false;
-        isDraggingNode = false;
-        draggedNodeIndex = -1;
-        // Set cursor back to default state
+        isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
         canvas.style.cursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
     });
     
     canvas.addEventListener('mouseleave', () => {
-        isPanning = false;
-        isDraggingDisclaimer = false;
-        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
+        canvas.style.cursor = 'default';
     });
     
     resetAllBtn.addEventListener('click', () => {
@@ -882,6 +795,7 @@
         canvas.style.height = 'auto';
     };
 </script>
+
 
 </body>
 </html>
