@@ -12,49 +12,47 @@
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Align to top to allow for scroll if content is long */
+            align-items: flex-start;
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
         }
         .app-container {
             background-color: #ffffff;
-            border-radius: 1rem; /* rounded-xl */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-            padding: 1rem; /* Slightly reduced padding for overall fit */
-            max-width: 1400px; /* Increased max-width for sidebar */
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            max-width: 1400px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 1rem; /* Reduced gap */
+            gap: 1rem;
         }
         @media (min-width: 1024px) {
             .app-container {
                 flex-direction: row;
-                height: 90vh; /* Fixed height for desktop layout */
-                align-items: stretch; /* Stretch items to fill height */
+                height: 90vh;
+                align-items: stretch;
             }
         }
-
         .sidebar {
             width: 100%;
-            max-width: 320px; /* Max width for sidebar on desktop */
-            background-color: #f8fafc; /* bg-gray-50 */
+            max-width: 320px;
+            background-color: #f8fafc;
             border-radius: 0.75rem;
             padding: 1rem;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* subtle inner shadow */
-            overflow-y: auto; /* Enable scrolling for many panels */
-            flex-shrink: 0; /* Prevent sidebar from shrinking */
-            display: flex; /* Ensure flex for internal arrangement */
-            flex-direction: column; /* Stack control groups vertically */
-            gap: 1.5rem; /* Spacing between control groups */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         @media (min-width: 1024px) {
             .sidebar {
-                height: auto; /* Auto height within flex container */
+                height: auto;
             }
         }
-
         .main-content {
             flex-grow: 1;
             display: flex;
@@ -65,31 +63,28 @@
             background-color: #ffffff;
             border-radius: 0.75rem;
         }
-
         canvas {
-            border: 1px solid #e2e8f0; /* border-gray-200 */
-            border-radius: 0.5rem; /* rounded-lg */
-            background-color: #f8fafc; /* bg-gray-50 */
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background-color: #f8fafc;
             width: 100%;
-            max-width: 700px; /* Limit canvas width for better control layout */
-            height: auto; /* Maintain aspect ratio */
+            max-width: 700px;
+            height: auto;
             display: block;
-            margin: 0 auto; /* Center canvas */
+            margin: 0 auto;
             cursor: default;
         }
-        
         .control-group {
-            background-color: #f8fafc; /* bg-gray-50 */
+            background-color: #f8fafc;
             padding: 1rem;
-            border-radius: 0.75rem; /* rounded-lg */
-            border: 1px solid #e2e8f0; /* border-gray-200 */
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
         }
-
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
             height: 8px;
-            background: #cbd5e1; /* bg-gray-300 */
+            background: #cbd5e1;
             border-radius: 5px;
             outline: none;
             opacity: 0.7;
@@ -103,7 +98,7 @@
             appearance: none;
             width: 20px;
             height: 20px;
-            background: #3b82f6; /* blue-500 */
+            background: #3b82f6;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
@@ -111,7 +106,7 @@
         input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
-            background: #3b82f6; /* blue-500 */
+            background: #3b82f6;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
@@ -224,7 +219,8 @@
                         <input type="range" id="shadowDistance" min="0" max="150" step="1" value="5" class="w-full">
                         <span id="shadowDistanceValue" class="block text-right text-gray-700 text-sm mt-1">5px</span>
                     </div>
-                    <div class="sm:col-span-2"> <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
+                    <div class="sm:col-span-2">
+                        <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
                         <input type="range" id="shadowAngle" min="0" max="360" step="1" value="45" class="w-full">
                         <span id="shadowAngleValue" class="block text-right text-gray-700 text-sm mt-1">45°</span>
                     </div>
@@ -262,6 +258,7 @@
                     <button id="resetView" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 active:bg-gray-700">Reset View</button>
                 </div>
             </div>
+
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Disclaimer Text</h2>
                 <div class="flex flex-col gap-3">
@@ -280,6 +277,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="flex flex-col gap-3 mt-4">
                 <button id="saveAsJpg" class="bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 active:bg-green-700 w-full">Save as JPG</button>
                 <button id="resetAll" class="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 active:bg-gray-400 w-full">Reset All</button>
@@ -326,7 +324,12 @@
     const zoomValueSpan = document.getElementById('zoomValue');
     const applyCropBtn = document.getElementById('applyCrop');
     const resetViewBtn = document.getElementById('resetView');
-
+    const toggleDisclaimerBtn = document.getElementById('toggleDisclaimer');
+    const disclaimerControls = document.getElementById('disclaimerControls');
+    const disclaimerFontSizeSlider = document.getElementById('disclaimerFontSize');
+    const disclaimerFontSizeValue = document.getElementById('disclaimerFontSizeValue');
+    const disclaimerColorInput = document.getElementById('disclaimerColor');
+    const disclaimerHexValue = document.getElementById('disclaimerHexValue');
 
     // --- State Variables ---
     let originalImage = new Image();
@@ -335,11 +338,21 @@
     let isPenToolActive = false;
     let drawingPoints = [];
     let isDrawing = false;
-    
     let zoomLevel = 1.0;
     let panOffset = { x: 0, y: 0 };
     let isPanning = false;
     let startPanPoint = { x: 0, y: 0 };
+    const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
+    let isDisclaimerVisible = false;
+    let isDraggingDisclaimer = false;
+    let disclaimerDragOffset = { x: 0, y: 0 };
+    let disclaimerProps = {
+        x: 0, y: 0,
+        fontSize: 24,
+        color: '#FFFFFF',
+        lineHeight: 28,
+        maxWidthPercentage: 0.9
+    };
 
     const defaultOverlayColor = '#3b82f6';
     const defaultOverlayOpacity = 0.5;
@@ -357,19 +370,6 @@
     const BASE_PEN_FIRST_POINT_RADIUS = 8;
     const BASE_PEN_CLOSE_THRESHOLD = 12;
 
-    const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
-    let isDisclaimerVisible = false;
-    let isDraggingDisclaimer = false;
-    let disclaimerDragOffset = { x: 0, y: 0 };
-    let disclaimerProps = {
-        x: 0, // Will be set dynamically
-        y: 0, // Will be set dynamically
-        fontSize: 24,
-        color: '#FFFFFF',
-        lineHeight: 28,
-        maxWidthPercentage: 0.9 // 90% of canvas width
-    };
-    
     // --- Helper Functions ---
     function hexToRgba(hex, alpha) {
         let r = 0, g = 0, b = 0;
@@ -384,25 +384,33 @@
         }
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+
     function getPenToolScale() {
         const referenceWidth = 700;
-        if (!isImageLoaded || !canvas.width) {
-            return 1;
-        }
+        if (!isImageLoaded || !canvas.width) { return 1; }
         return canvas.width / referenceWidth;
     }
-    function getDisclaimerBounds(context) {
-        if (!isDisclaimerVisible || !isImageLoaded) return null;
-        
+
+    // ✨ REFACTORED: Central function to get mouse coordinates
+    function getMousePos(canvasEl, event) {
+        const rect = canvasEl.getBoundingClientRect();
+        const mouseX = (event.clientX - rect.left) * (canvasEl.width / rect.width);
+        const mouseY = (event.clientY - rect.top) * (canvasEl.height / rect.height);
+        return {
+            x: mouseX,
+            y: mouseY,
+            tx: (mouseX - panOffset.x) / zoomLevel,
+            ty: (mouseY - panOffset.y) / zoomLevel,
+        };
+    }
+    
+    function getDisclaimerLines(context) {
         const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
-        const scaledLineHeight = disclaimerProps.lineHeight * (canvas.width / 700);
-        context.font = `${scaledFontSize}px Inter`;
-        
+        context.font = `bold ${scaledFontSize}px Inter`;
         const maxWidth = canvas.width * disclaimerProps.maxWidthPercentage;
         const words = disclaimerText.split(' ');
         let lines = [];
         let currentLine = words[0];
-
         for (let i = 1; i < words.length; i++) {
             let word = words[i];
             let width = context.measureText(currentLine + " " + word).width;
@@ -414,46 +422,39 @@
             }
         }
         lines.push(currentLine);
+        return lines;
+    }
 
+    function getDisclaimerBounds(context) {
+        if (!isDisclaimerVisible || !isImageLoaded) return null;
+        const lines = getDisclaimerLines(context);
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
         const totalHeight = lines.length * scaledLineHeight;
         const totalWidth = Math.max(...lines.map(line => context.measureText(line).width));
-        
         return {
-            x: disclaimerProps.x - totalWidth / 2, // Centered alignment
+            x: disclaimerProps.x - totalWidth / 2,
             y: disclaimerProps.y - scaledLineHeight,
             width: totalWidth,
             height: totalHeight
         };
     }
     
-    // ✨ NEW: Helper function to draw the wrapped text
     function drawDisclaimer(context) {
         if (!isDisclaimerVisible) return;
-        
-        const bounds = getDisclaimerBounds(context);
-        const scaledLineHeight = disclaimerProps.lineHeight * (canvas.width / 700);
-
+        const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
+        context.font = `bold ${scaledFontSize}px Inter`;
         context.fillStyle = disclaimerProps.color;
-        context.textAlign = 'center'; // Always draw centered
+        context.textAlign = 'center';
         
-        const words = disclaimerText.split(' ');
-        let line = '';
+        const lines = getDisclaimerLines(context);
         let y = disclaimerProps.y;
-
-        for (let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + ' ';
-            let metrics = context.measureText(testLine);
-            let testWidth = metrics.width;
-            if (testWidth > bounds.width && n > 0) {
-                context.fillText(line, disclaimerProps.x, y);
-                line = words[n] + ' ';
-                y += scaledLineHeight;
-            } else {
-                line = testLine;
-            }
+        for (const line of lines) {
+            context.fillText(line, disclaimerProps.x, y);
+            y += scaledLineHeight;
         }
-        context.fillText(line, disclaimerProps.x, y);
     }
+
     // --- Core Functions ---
     function initializeControls() {
         overlayColorInput.value = defaultOverlayColor;
@@ -467,6 +468,7 @@
         shadowBlurInput.value = defaultShadowBlur;
         shadowBlurValueSpan.textContent = `${defaultShadowBlur}px`;
         shadowDistanceInput.value = defaultShadowDistance;
+        // ✨ BUG FIX: Use correct variable name
         shadowDistanceValueSpan.textContent = `${defaultShadowDistance}px`;
         shadowAngleInput.value = defaultShadowAngle;
         shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
@@ -475,6 +477,11 @@
         outlineHexValueSpan.textContent = defaultOutlineColor;
         outlineWidthInput.value = defaultOutlineWidth;
         outlineWidthValueSpan.textContent = `${defaultOutlineWidth}px`;
+        
+        zoomSlider.value = 1.0;
+        zoomValueSpan.textContent = '100%';
+        zoomLevel = 1.0;
+        panOffset = { x: 0, y: 0 };
 
         isDisclaimerVisible = false;
         disclaimerControls.classList.add('hidden');
@@ -485,12 +492,8 @@
         disclaimerColorInput.value = '#FFFFFF';
         disclaimerHexValue.textContent = '#FFFFFF';
         disclaimerProps.fontSize = 24;
+        disclaimerProps.lineHeight = 28;
         disclaimerProps.color = '#FFFFFF';
-        
-        zoomSlider.value = 1.0;
-        zoomValueSpan.textContent = '100%';
-        zoomLevel = 1.0;
-        panOffset = { x: 0, y: 0 };
     }
 
     function showMessage(message, type = 'info') {
@@ -540,21 +543,16 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-
         ctx.translate(panOffset.x, panOffset.y);
         ctx.scale(zoomLevel, zoomLevel);
 
-        // 1. Draw Bottom Layer with Color Overlay
-        ctx.save();
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         const overlayColor = overlayColorInput.value;
         const overlayOpacity = parseFloat(overlayOpacityInput.value);
         ctx.fillStyle = overlayColor;
         ctx.globalAlpha = overlayOpacity;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
 
-        // 2. Draw Top Layer with Mask and Drop Shadow
         if (maskPath) {
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
@@ -584,11 +582,8 @@
                 ctx.stroke(maskPath);
                 ctx.restore();
             }
-        } else {
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         }
 
-        // 3. Draw Pen Tool guides
         if (isPenToolActive && isDrawing && drawingPoints.length > 0) {
             const scale = getPenToolScale();
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
@@ -612,9 +607,9 @@
                 ctx.fill();
             }
         }
-        // 4. Draw disclaimer
-        drawDisclaimer(ctx);
         
+        drawDisclaimer(ctx);
+
         ctx.restore();
     }
 
@@ -623,263 +618,157 @@
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                loadImage(event.target.result);
-            };
+            reader.onload = (event) => loadImage(event.target.result);
             reader.readAsDataURL(file);
         }
     });
     
-    overlayColorInput.addEventListener('input', () => {
-        overlayHexValueSpan.textContent = overlayColorInput.value;
-        draw();
-    });
-    overlayOpacityInput.addEventListener('input', () => {
-        overlayOpacityValueSpan.textContent = parseFloat(overlayOpacityInput.value).toFixed(2);
-        draw();
-    });
-    overlayPresetBtns.forEach(button => {
-        button.addEventListener('click', () => {
-            const color = button.dataset.color;
-            overlayColorInput.value = color;
-            overlayHexValueSpan.textContent = color;
-            draw();
-        });
-    });
-    shadowColorInput.addEventListener('input', () => {
-        shadowHexValueSpan.textContent = shadowColorInput.value;
-        draw();
-    });
-    shadowOpacityInput.addEventListener('input', () => { 
-        shadowOpacityValueSpan.textContent = parseFloat(shadowOpacityInput.value).toFixed(2);
-        draw();
-    });
-    shadowBlurInput.addEventListener('input', () => {
-        shadowBlurValueSpan.textContent = `${shadowBlurInput.value}px`;
-        draw();
-    });
-    shadowDistanceInput.addEventListener('input', () => {
-        shadowDistanceValueSpan.textContent = `${shadowDistanceInput.value}px`;
-        draw();
-    });
-    shadowAngleInput.addEventListener('input', () => {
-        shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`;
-        draw();
-    });
+    // All other control event listeners
+    overlayColorInput.addEventListener('input', () => { overlayHexValueSpan.textContent = overlayColorInput.value; draw(); });
+    overlayOpacityInput.addEventListener('input', () => { overlayOpacityValueSpan.textContent = parseFloat(overlayOpacityInput.value).toFixed(2); draw(); });
+    overlayPresetBtns.forEach(button => { button.addEventListener('click', () => { const color = button.dataset.color; overlayColorInput.value = color; overlayHexValueSpan.textContent = color; draw(); }); });
+    shadowColorInput.addEventListener('input', () => { shadowHexValueSpan.textContent = shadowColorInput.value; draw(); });
+    shadowOpacityInput.addEventListener('input', () => { shadowOpacityValueSpan.textContent = parseFloat(shadowOpacityInput.value).toFixed(2); draw(); });
+    shadowBlurInput.addEventListener('input', () => { shadowBlurValueSpan.textContent = `${shadowBlurInput.value}px`; draw(); });
+    shadowDistanceInput.addEventListener('input', () => { shadowDistanceValueSpan.textContent = `${shadowDistanceInput.value}px`; draw(); });
+    shadowAngleInput.addEventListener('input', () => { shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`; draw(); });
     activatePenToolBtn.addEventListener('click', () => {
         isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
             activatePenToolBtn.textContent = 'Deactivate Pen Tool';
-            activatePenToolBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
-            activatePenToolBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
-            showMessage('Pen tool activated. Click on the image to draw your mask.', 'info');
+            activatePenToolBtn.classList.replace('bg-blue-500', 'bg-orange-500');
+            showMessage('Pen tool activated.', 'info');
         } else {
             activatePenToolBtn.textContent = 'Activate Pen Tool';
-            activatePenToolBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
-            activatePenToolBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
+            activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
             isDrawing = false;
             showMessage('Pen tool deactivated.', 'info');
         }
         draw();
     });
     clearMaskBtn.addEventListener('click', () => {
-        drawingPoints = [];
-        maskPath = null;
-        isDrawing = false;
+        drawingPoints = []; maskPath = null; isDrawing = false;
         showMessage('Mask cleared!', 'success');
         draw();
     });
     enableOutlineInput.addEventListener('change', draw);
-    outlineColorInput.addEventListener('input', () => {
-        outlineHexValueSpan.textContent = outlineColorInput.value;
-        draw();
-    });
-    outlineWidthInput.addEventListener('input', () => {
-        outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`;
-        draw();
-    });
-
+    outlineColorInput.addEventListener('input', () => { outlineHexValueSpan.textContent = outlineColorInput.value; draw(); });
+    outlineWidthInput.addEventListener('input', () => { outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`; draw(); });
     zoomSlider.addEventListener('input', (e) => {
         zoomLevel = parseFloat(e.target.value);
         zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
-        if (zoomLevel === 1) {
-            panOffset = { x: 0, y: 0 };
-        }
+        if (zoomLevel === 1) { panOffset = { x: 0, y: 0 }; }
         canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
         draw();
     });
-
-    resetViewBtn.addEventListener('click', () => {
-        initializeControls();
-        draw();
-    });
-
+    resetViewBtn.addEventListener('click', () => { initializeControls(); draw(); });
     applyCropBtn.addEventListener('click', () => {
         if (!isImageLoaded) return;
-
-        const sourceX = -panOffset.x;
-        const sourceY = -panOffset.y;
-        const sourceWidth = canvas.width / zoomLevel;
-        const sourceHeight = canvas.height / zoomLevel;
-
+        const sX = -panOffset.x, sY = -panOffset.y;
+        const sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = sourceWidth;
-        tempCanvas.height = sourceHeight;
+        tempCanvas.width = sW; tempCanvas.height = sH;
         const tempCtx = tempCanvas.getContext('2d');
-
-        tempCtx.drawImage(
-            originalImage,
-            sourceX, sourceY, sourceWidth, sourceHeight,
-            0, 0, sourceWidth, sourceHeight
-        );
-        
+        tempCtx.drawImage(originalImage, sX, sY, sW, sH, 0, 0, sW, sH);
         clearMaskBtn.click();
         loadImage(tempCanvas.toDataURL());
-        showMessage('Crop applied successfully!', 'success');
+        showMessage('Crop applied!', 'success');
     });
-
+    saveAsJpgBtn.addEventListener('click', () => {
+        if (!isImageLoaded) { showMessage('Please upload an image first!', 'error'); return; }
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.download = 'graphics_manipulated.jpg';
+        link.click();
+        showMessage('Image saved as JPG!', 'success');
+    });
     toggleDisclaimerBtn.addEventListener('click', () => {
         isDisclaimerVisible = !isDisclaimerVisible;
         if (isDisclaimerVisible) {
-            // Show controls and set default position
             disclaimerControls.classList.remove('hidden');
             toggleDisclaimerBtn.textContent = 'Remove Disclaimer';
             toggleDisclaimerBtn.classList.replace('bg-blue-500', 'bg-red-500');
-
-            // Set initial position to bottom-center of the canvas
             disclaimerProps.x = canvas.width / 2;
-            disclaimerProps.y = canvas.height - (disclaimerProps.lineHeight * 3);
+            disclaimerProps.y = canvas.height - (disclaimerProps.lineHeight * 3 * (canvas.width / 700));
         } else {
-            // Hide controls
             disclaimerControls.classList.add('hidden');
             toggleDisclaimerBtn.textContent = 'Add Disclaimer';
             toggleDisclaimerBtn.classList.replace('bg-red-500', 'bg-blue-500');
         }
         draw();
     });
-
     disclaimerFontSizeSlider.addEventListener('input', (e) => {
         const size = parseInt(e.target.value, 10);
         disclaimerProps.fontSize = size;
-        disclaimerProps.lineHeight = size * 1.2; // Adjust line height based on font size
         disclaimerFontSizeValue.textContent = `${size}px`;
         draw();
     });
-
     disclaimerColorInput.addEventListener('input', (e) => {
         disclaimerProps.color = e.target.value;
         disclaimerHexValue.textContent = e.target.value;
         draw();
     });
-    
-    saveAsJpgBtn.addEventListener('click', () => {
-        if (!isImageLoaded) {
-            showMessage('Please upload an image first!', 'error');
-            return;
-        }
-        try {
-            const imageDataURL = canvas.toDataURL('image/jpeg', 0.9);
-            const link = document.createElement('a');
-            link.href = imageDataURL;
-            link.download = 'graphics_manipulated.jpg';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showMessage('Image saved as JPG!', 'success');
-        } catch (error) {
-            showMessage('Failed to save image. Error: ' + error.message, 'error');
-            console.error('Save image error:', error);
-        }
-    });
 
     canvas.addEventListener('mousedown', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        
-        // Convert mouse coordinates to the transformed (zoomed/panned) space for hit detection
-        const transformedMouseX = (mouseX - panOffset.x) / zoomLevel;
-        const transformedMouseY = (mouseY - panOffset.y) / zoomLevel;
-
-        // 1. Handle Disclaimer Dragging
+        const pos = getMousePos(canvas, e);
         const bounds = getDisclaimerBounds(ctx);
-        if (bounds && transformedMouseX > bounds.x && transformedMouseX < bounds.x + bounds.width &&
-            transformedMouseY > bounds.y && transformedMouseY < bounds.y + bounds.height) {
+        if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
             isDraggingDisclaimer = true;
             canvas.style.cursor = 'move';
-            // Record the offset from the text's origin to the click point
-            disclaimerDragOffset.x = transformedMouseX - disclaimerProps.x;
-            disclaimerDragOffset.y = transformedMouseY - disclaimerProps.y;
-            return; // Prioritize disclaimer dragging
+            disclaimerDragOffset.x = pos.tx - disclaimerProps.x;
+            disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
+            return;
         }
-
-        // 2. Handle Panning (if not dragging disclaimer)
         if (zoomLevel > 1 && !isPenToolActive) {
             isPanning = true;
-            startPanPoint = { x: mouseX - panOffset.x, y: mouseY - panOffset.y };
+            startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
             canvas.style.cursor = 'grabbing';
             return;
         }
-
-        // 3. Handle Pen Tool (if not dragging or panning)
         if (isPenToolActive) {
-            const transformedX = (mouseX - panOffset.x) / zoomLevel;
-            const transformedY = (mouseY - panOffset.y) / zoomLevel;
-            
             if (!isDrawing) {
                 isDrawing = true;
-                drawingPoints.push({ x: transformedX, y: transformedY });
+                drawingPoints.push({ x: pos.tx, y: pos.ty });
             } else {
                 const firstPoint = drawingPoints[0];
-                const distance = Math.sqrt(Math.pow(transformedX - firstPoint.x, 2) + Math.pow(transformedY - firstPoint.y, 2));
+                const distance = Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2));
                 const scale = getPenToolScale();
                 const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * scale;
-
                 if (distance < closeThreshold) {
                     isDrawing = false;
                     const path = new Path2D();
                     path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-                    for (let i = 1; i < drawingPoints.length; i++) {
-                        path.lineTo(drawingPoints[i].x, drawingPoints[i].y);
-                    }
+                    for (let i = 1; i < drawingPoints.length; i++) { path.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
                     path.closePath();
                     maskPath = path;
                     drawingPoints = [];
                     showMessage('Mask applied!', 'success');
                 } else {
-                    drawingPoints.push({ x: transformedX, y: transformedY });
+                    drawingPoints.push({ x: pos.tx, y: pos.ty });
                 }
             }
-            draw();
         }
+        draw();
     });
 
     canvas.addEventListener('mousemove', (e) => {
-         const rect = canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        
-        // 1. Handle Disclaimer Dragging
         if (isDraggingDisclaimer) {
-            const transformedMouseX = (mouseX - panOffset.x) / zoomLevel;
-            const transformedMouseY = (mouseY - panOffset.y) / zoomLevel;
-            disclaimerProps.x = transformedMouseX - disclaimerDragOffset.x;
-            disclaimerProps.y = transformedMouseY - disclaimerDragOffset.y;
+            const pos = getMousePos(canvas, e);
+            disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
+            disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
             draw();
             return;
         }
-        
-        if (!isPanning) return;
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        panOffset.x = mouseX - startPanPoint.x;
-        panOffset.y = mouseY - startPanPoint.y;
-        const maxPanX = (canvas.width * zoomLevel - canvas.width);
-        const maxPanY = (canvas.height * zoomLevel - canvas.height);
-        panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
-        panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
-        draw();
+        if (isPanning) {
+            const pos = getMousePos(canvas, e);
+            panOffset.x = pos.x - startPanPoint.x;
+            panOffset.y = pos.y - startPanPoint.y;
+            const maxPanX = (canvas.width * zoomLevel - canvas.width);
+            const maxPanY = (canvas.height * zoomLevel - canvas.height);
+            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
+            panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+            draw();
+        }
     });
 
     canvas.addEventListener('mouseup', () => {
@@ -893,22 +782,13 @@
         isDraggingDisclaimer = false;
         canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
     });
-
+    
     resetAllBtn.addEventListener('click', () => {
-        drawingPoints = [];
-        maskPath = null;
-        isDrawing = false;
-        isPenToolActive = false;
-        activatePenToolBtn.textContent = 'Activate Pen Tool';
-        activatePenToolBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
-        activatePenToolBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
-        
         loadImage(defaultImageUrl);
         showMessage('All settings reset!', 'success');
     });
 
     window.addEventListener('resize', draw);
-
     window.onload = () => {
         initializeControls();
         loadImage(defaultImageUrl);
