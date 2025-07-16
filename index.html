@@ -403,20 +403,6 @@
             ty: (mouseY - panOffset.y) / zoomLevel,
         };
     }
-
-    function updateMaskFromPoints() {
-        if (maskPoints.length < 2) {
-            maskPath = null;
-            return;
-        }
-        const path = new Path2D();
-        path.moveTo(maskPoints[0].x, maskPoints[0].y);
-        for (let i = 1; i < maskPoints.length; i++) {
-            path.lineTo(maskPoints[i].x, maskPoints[i].y);
-        }
-        path.closePath();
-        maskPath = path;
-    }
     
     function getDisclaimerLines(context) {
         const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
@@ -621,19 +607,6 @@
                 ctx.fill();
             }
         }
-
-         if (isPenToolActive && maskPoints.length > 0) {
-            ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
-            ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
-            ctx.beginPath();
-            ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
-            for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
-            ctx.closePath();
-            ctx.stroke();
-            
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
-            maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
-        }
         
         drawDisclaimer(ctx);
 
@@ -736,20 +709,8 @@
         draw();
     });
 
-    clearMaskBtn.addEventListener('click', () => {
-        drawingPoints = [];
-        maskPoints = [];
-        maskPath = null;
-        isDrawing = false;
-        showMessage('Mask cleared!', 'success');
-        draw();
-    });
-
-    // ✨ MODIFIED: Mouse events now handle node dragging
     canvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(canvas, e);
-        
-        // Priority 1: Disclaimer Drag
         const bounds = getDisclaimerBounds(ctx);
         if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
             isDraggingDisclaimer = true;
@@ -758,77 +719,48 @@
             disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
             return;
         }
-
-        if (isPenToolActive) {
-            // Priority 2: Node Drag
-            const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
-            for (let i = 0; i < maskPoints.length; i++) {
-                const node = maskPoints[i];
-                const distance = Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2));
-                if (distance < nodeRadius) {
-                    isDraggingNode = true;
-                    draggedNodeIndex = i;
-                    canvas.style.cursor = 'grabbing';
-                    return;
-                }
-            }
-        }
-
-        // Priority 3: Panning
         if (zoomLevel > 1 && !isPenToolActive) {
             isPanning = true;
             startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
             canvas.style.cursor = 'grabbing';
             return;
         }
-        
-        // Priority 4: Drawing new pen path
         if (isPenToolActive) {
-            // If starting a new drawing, clear any existing mask
             if (!isDrawing) {
-                maskPoints = [];
-                maskPath = null;
-                drawingPoints = [];
-            }
-
-            isDrawing = true;
-            if (drawingPoints.length > 0) {
+                isDrawing = true;
+                drawingPoints.push({ x: pos.tx, y: pos.ty });
+            } else {
                 const firstPoint = drawingPoints[0];
                 const distance = Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2));
-                const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * getPenToolScale();
-                
-                if (distance < closeThreshold) { // Close the path
+                const scale = getPenToolScale();
+                const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * scale;
+                if (distance < closeThreshold) {
                     isDrawing = false;
-                    maskPoints = [...drawingPoints];
+                    const path = new Path2D();
+                    path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+                    for (let i = 1; i < drawingPoints.length; i++) { path.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
+                    path.closePath();
+                    maskPath = path;
                     drawingPoints = [];
-                    updateMaskFromPoints();
                     showMessage('Mask applied!', 'success');
                 } else {
                     drawingPoints.push({ x: pos.tx, y: pos.ty });
                 }
-            } else {
-                drawingPoints.push({ x: pos.tx, y: pos.ty });
             }
         }
         draw();
     });
 
     canvas.addEventListener('mousemove', (e) => {
-        const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
+            const pos = getMousePos(canvas, e);
             disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
             disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
             draw();
             return;
         }
-        if (isDraggingNode) {
-            maskPoints[draggedNodeIndex].x = pos.tx;
-            maskPoints[draggedNodeIndex].y = pos.ty;
-            updateMaskFromPoints();
-            draw();
-            return;
-        }
         if (isPanning) {
+            const pos = getMousePos(canvas, e);
             panOffset.x = pos.x - startPanPoint.x;
             panOffset.y = pos.y - startPanPoint.y;
             const maxPanX = (canvas.width * zoomLevel - canvas.width);
@@ -836,31 +768,13 @@
             panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
             panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
             draw();
-            return;
-        }
-
-        // Hover effect for nodes
-        if (isPenToolActive && maskPoints.length > 0) {
-            const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
-            let hoveringNode = false;
-            for (const node of maskPoints) {
-                const distance = Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2));
-                if (distance < nodeRadius) {
-                    hoveringNode = true;
-                    break;
-                }
-            }
-            canvas.style.cursor = hoveringNode ? 'grab' : 'crosshair';
         }
     });
 
     canvas.addEventListener('mouseup', () => {
         isPanning = false;
         isDraggingDisclaimer = false;
-        isDraggingNode = false;
-        draggedNodeIndex = -1;
-        // Set cursor back to default state
-        canvas.style.cursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
     });
     
     canvas.addEventListener('mouseleave', () => {
