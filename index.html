@@ -259,7 +259,7 @@
                 </div>
             </div>
 
-            <div class="control-group">
+           <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Disclaimer Text</h2>
                 <div class="flex flex-col gap-3">
                     <button id="toggleDisclaimer" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Add Disclaimer</button>
@@ -269,6 +269,11 @@
                         <label for="disclaimerFontSize" class="block text-gray-600 font-medium mb-1">Font Size:</label>
                         <input type="range" id="disclaimerFontSize" min="12" max="72" step="1" value="24" class="w-full">
                         <span id="disclaimerFontSizeValue" class="block text-right text-gray-700 text-sm mt-1">24px</span>
+                    </div>
+                    <div>
+                        <label for="disclaimerBoxWidth" class="block text-gray-600 font-medium mb-1">Box Width:</label>
+                        <input type="range" id="disclaimerBoxWidth" min="100" max="1000" step="10" value="500" class="w-full">
+                        <span id="disclaimerBoxWidthValue" class="block text-right text-gray-700 text-sm mt-1">500px</span>
                     </div>
                     <div class="flex items-center gap-4">
                         <label for="disclaimerColor" class="text-gray-600 font-medium">Color:</label>
@@ -330,30 +335,41 @@
     const disclaimerFontSizeValue = document.getElementById('disclaimerFontSizeValue');
     const disclaimerColorInput = document.getElementById('disclaimerColor');
     const disclaimerHexValue = document.getElementById('disclaimerHexValue');
+    const disclaimerBoxWidthSlider = document.getElementById('disclaimerBoxWidth');
+    const disclaimerBoxWidthValue = document.getElementById('disclaimerBoxWidthValue');
+
 
     // --- State Variables ---
     let originalImage = new Image();
     let isImageLoaded = false;
-    let maskPath = null;
     let isPenToolActive = false;
-    let drawingPoints = [];
-    let isDrawing = false;
     let zoomLevel = 1.0;
     let panOffset = { x: 0, y: 0 };
     let isPanning = false;
     let startPanPoint = { x: 0, y: 0 };
+    
+    // Pen Tool State
+    let maskPath = null;
+    let drawingPoints = [];
+    let maskPoints = [];
+    let isDrawing = false;
+    let isDraggingNode = false;
+    let draggedNodeIndex = -1;
+
+    // Disclaimer State
     const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
     let isDisclaimerVisible = false;
     let isDraggingDisclaimer = false;
     let disclaimerDragOffset = { x: 0, y: 0 };
     let disclaimerProps = {
-        x: 0, y: 0,
+        x: 50, y: 50,
+        boxWidth: 500,
+        padding: 15,
         fontSize: 24,
         color: '#FFFFFF',
-        lineHeight: 28,
-        maxWidthPercentage: 0.9
     };
-
+    
+    // Constants and Defaults
     const defaultOverlayColor = '#3b82f6';
     const defaultOverlayOpacity = 0.5;
     const defaultShadowColor = '#000000';
@@ -373,53 +389,52 @@
     // --- Helper Functions ---
     function hexToRgba(hex, alpha) {
         let r = 0, g = 0, b = 0;
-        if (hex.length === 4) {
-            r = parseInt(hex[1] + hex[1], 16);
-            g = parseInt(hex[2] + hex[2], 16);
-            b = parseInt(hex[3] + hex[3], 16);
-        } else if (hex.length === 7) {
-            r = parseInt(hex.substring(1, 3), 16);
-            g = parseInt(hex.substring(3, 5), 16);
-            b = parseInt(hex.substring(5, 7), 16);
-        }
+        if (hex.length === 4) { r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16); } 
+        else if (hex.length === 7) { r = parseInt(hex.substring(1, 3), 16); g = parseInt(hex.substring(3, 5), 16); b = parseInt(hex.substring(5, 7), 16); }
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function getPenToolScale() {
-        const referenceWidth = 700;
         if (!isImageLoaded || !canvas.width) { return 1; }
-        return canvas.width / referenceWidth;
+        return canvas.width / 700;
     }
 
-    // ✨ REFACTORED: Central function to get mouse coordinates
     function getMousePos(canvasEl, event) {
         const rect = canvasEl.getBoundingClientRect();
         const mouseX = (event.clientX - rect.left) * (canvasEl.width / rect.width);
         const mouseY = (event.clientY - rect.top) * (canvasEl.height / rect.height);
         return {
-            x: mouseX,
-            y: mouseY,
+            x: mouseX, y: mouseY,
             tx: (mouseX - panOffset.x) / zoomLevel,
             ty: (mouseY - panOffset.y) / zoomLevel,
         };
     }
-    
+
+    function updateMaskFromPoints() {
+        if (maskPoints.length < 2) {
+            maskPath = null;
+            return;
+        }
+        const path = new Path2D();
+        path.moveTo(maskPoints[0].x, maskPoints[0].y);
+        for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
+        path.closePath();
+        maskPath = path;
+    }
+
     function getDisclaimerLines(context) {
-        const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
+        const scaledFontSize = disclaimerProps.fontSize * getPenToolScale();
         context.font = `bold ${scaledFontSize}px Inter`;
-        const maxWidth = canvas.width * disclaimerProps.maxWidthPercentage;
+        const maxWidth = disclaimerProps.boxWidth - (disclaimerProps.padding * 2);
+        
         const words = disclaimerText.split(' ');
         let lines = [];
         let currentLine = words[0];
         for (let i = 1; i < words.length; i++) {
             let word = words[i];
             let width = context.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) {
-                currentLine += " " + word;
-            } else {
-                lines.push(currentLine);
-                currentLine = word;
-            }
+            if (width < maxWidth && currentLine.length > 0) { currentLine += " " + word; } 
+            else { lines.push(currentLine); currentLine = word; }
         }
         lines.push(currentLine);
         return lines;
@@ -427,31 +442,46 @@
 
     function getDisclaimerBounds(context) {
         if (!isDisclaimerVisible || !isImageLoaded) return null;
+        
         const lines = getDisclaimerLines(context);
-        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
-        const totalHeight = lines.length * scaledLineHeight;
-        const totalWidth = Math.max(...lines.map(line => context.measureText(line).width));
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * getPenToolScale();
+        const scaledPadding = disclaimerProps.padding * getPenToolScale();
+        const totalTextHeight = lines.length * scaledLineHeight;
+        
+        const boxHeight = totalTextHeight + (scaledPadding * 2);
+        
         return {
-            x: disclaimerProps.x - totalWidth / 2,
-            y: disclaimerProps.y - scaledLineHeight,
-            width: totalWidth,
-            height: totalHeight
+            x: disclaimerProps.x,
+            y: disclaimerProps.y,
+            width: disclaimerProps.boxWidth,
+            height: boxHeight,
         };
     }
     
-    function drawDisclaimer(context) {
+    function drawDisclaimerAndBox(context) {
         if (!isDisclaimerVisible) return;
-        const scaledFontSize = disclaimerProps.fontSize * (canvas.width / 700);
-        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * (canvas.width / 700);
+        
+        const scale = getPenToolScale();
+        const bounds = getDisclaimerBounds(context);
+        if (!bounds) return;
+
+        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        context.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        
+        const scaledFontSize = disclaimerProps.fontSize * scale;
+        const scaledLineHeight = (disclaimerProps.fontSize * 1.2) * scale;
+        const scaledPadding = disclaimerProps.padding * scale;
         context.font = `bold ${scaledFontSize}px Inter`;
         context.fillStyle = disclaimerProps.color;
         context.textAlign = 'center';
         
         const lines = getDisclaimerLines(context);
-        let y = disclaimerProps.y;
+        let textY = bounds.y + scaledPadding + scaledLineHeight * 0.8;
+        const textX = bounds.x + bounds.width / 2;
+
         for (const line of lines) {
-            context.fillText(line, disclaimerProps.x, y);
-            y += scaledLineHeight;
+            context.fillText(line, textX, textY);
+            textY += scaledLineHeight;
         }
     }
 
@@ -468,7 +498,6 @@
         shadowBlurInput.value = defaultShadowBlur;
         shadowBlurValueSpan.textContent = `${defaultShadowBlur}px`;
         shadowDistanceInput.value = defaultShadowDistance;
-        // ✨ BUG FIX: Use correct variable name
         shadowDistanceValueSpan.textContent = `${defaultShadowDistance}px`;
         shadowAngleInput.value = defaultShadowAngle;
         shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
@@ -487,28 +516,28 @@
         disclaimerControls.classList.add('hidden');
         toggleDisclaimerBtn.textContent = 'Add Disclaimer';
         toggleDisclaimerBtn.classList.replace('bg-red-500', 'bg-blue-500');
+        
+        disclaimerProps.fontSize = 24;
         disclaimerFontSizeSlider.value = 24;
         disclaimerFontSizeValue.textContent = '24px';
+        
+        disclaimerProps.color = '#FFFFFF';
         disclaimerColorInput.value = '#FFFFFF';
         disclaimerHexValue.textContent = '#FFFFFF';
-        disclaimerProps.fontSize = 24;
-        disclaimerProps.lineHeight = 28;
-        disclaimerProps.color = '#FFFFFF';
+        
+        disclaimerProps.boxWidth = 500;
+        disclaimerBoxWidthSlider.max = canvas.width || 1000;
+        disclaimerBoxWidthSlider.value = 500;
+        disclaimerBoxWidthValue.textContent = '500px';
     }
 
     function showMessage(message, type = 'info') {
         messageBox.textContent = message;
         messageBox.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
-        if (type === 'info') {
-            messageBox.classList.add('bg-blue-100', 'text-blue-800');
-        } else if (type === 'error') {
-            messageBox.classList.add('bg-red-100', 'text-red-800');
-        } else if (type === 'success') {
-            messageBox.classList.add('bg-green-100', 'text-green-800');
-        }
-        setTimeout(() => {
-            messageBox.classList.add('hidden');
-        }, 3000);
+        if (type === 'info') { messageBox.classList.add('bg-blue-100', 'text-blue-800'); } 
+        else if (type === 'error') { messageBox.classList.add('bg-red-100', 'text-red-800'); } 
+        else if (type === 'success') { messageBox.classList.add('bg-green-100', 'text-green-800'); }
+        setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
     }
     
     function loadImage(src) {
@@ -547,11 +576,10 @@
         ctx.scale(zoomLevel, zoomLevel);
 
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-        const overlayColor = overlayColorInput.value;
-        const overlayOpacity = parseFloat(overlayOpacityInput.value);
-        ctx.fillStyle = overlayColor;
-        ctx.globalAlpha = overlayOpacity;
+        ctx.fillStyle = overlayColorInput.value;
+        ctx.globalAlpha = parseFloat(overlayOpacityInput.value);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
 
         if (maskPath) {
             const tempCanvas = document.createElement('canvas');
@@ -562,21 +590,17 @@
             tempCtx.clip(maskPath);
             tempCtx.drawImage(originalImage, 0, 0, tempCanvas.width, tempCanvas.height);
             tempCtx.restore();
-
             ctx.save();
-            const shadowDistance = parseInt(shadowDistanceInput.value);
-            const shadowAngleDegrees = parseInt(shadowAngleInput.value);
-            const shadowAngleRadians = (shadowAngleDegrees - 180) * Math.PI / 180;
-            const shadowOpacity = parseFloat(shadowOpacityInput.value);
-            ctx.shadowColor = hexToRgba(shadowColorInput.value, shadowOpacity);
+            const sd = parseInt(shadowDistanceInput.value), sa = (parseInt(shadowAngleInput.value) - 180) * Math.PI / 180;
+            ctx.shadowColor = hexToRgba(shadowColorInput.value, parseFloat(shadowOpacityInput.value));
             ctx.shadowBlur = parseInt(shadowBlurInput.value);
-            ctx.shadowOffsetX = shadowDistance * Math.cos(shadowAngleRadians);
-            ctx.shadowOffsetY = shadowDistance * Math.sin(shadowAngleRadians);
+            ctx.shadowOffsetX = sd * Math.cos(sa);
+            ctx.shadowOffsetY = sd * Math.sin(sa);
             ctx.drawImage(tempCanvas, 0, 0);
             ctx.restore();
-
             if (enableOutlineInput.checked) {
                 ctx.save();
+                ctx.globalAlpha = 1.0;  // Ensure full opacity for outline
                 ctx.strokeStyle = outlineColorInput.value;
                 ctx.lineWidth = parseInt(outlineWidthInput.value);
                 ctx.stroke(maskPath);
@@ -584,22 +608,16 @@
             }
         }
 
-        if (isPenToolActive && isDrawing && drawingPoints.length > 0) {
-            const scale = getPenToolScale();
+        const scale = getPenToolScale();
+        if (isDrawing && drawingPoints.length > 0) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
             ctx.beginPath();
             ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-            for (let i = 1; i < drawingPoints.length; i++) {
-                ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y);
-            }
+            for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
             ctx.stroke();
             ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-            drawingPoints.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
             if (drawingPoints.length > 0) {
                 ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                 ctx.beginPath();
@@ -608,22 +626,28 @@
             }
         }
         
-        drawDisclaimer(ctx);
-
+        if (isPenToolActive && maskPoints.length > 0) {
+            ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
+            ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
+            ctx.beginPath();
+            ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
+            for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
+            maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+        }
+        
+        drawDisclaimerAndBox(ctx);
         ctx.restore();
     }
 
     // --- Event Listeners ---
     imageUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => loadImage(event.target.result);
-            reader.readAsDataURL(file);
-        }
+        if (file) { const reader = new FileReader(); reader.onload = (event) => loadImage(event.target.result); reader.readAsDataURL(file); }
     });
     
-    // All other control event listeners
     overlayColorInput.addEventListener('input', () => { overlayHexValueSpan.textContent = overlayColorInput.value; draw(); });
     overlayOpacityInput.addEventListener('input', () => { overlayOpacityValueSpan.textContent = parseFloat(overlayOpacityInput.value).toFixed(2); draw(); });
     overlayPresetBtns.forEach(button => { button.addEventListener('click', () => { const color = button.dataset.color; overlayColorInput.value = color; overlayHexValueSpan.textContent = color; draw(); }); });
@@ -632,28 +656,37 @@
     shadowBlurInput.addEventListener('input', () => { shadowBlurValueSpan.textContent = `${shadowBlurInput.value}px`; draw(); });
     shadowDistanceInput.addEventListener('input', () => { shadowDistanceValueSpan.textContent = `${shadowDistanceInput.value}px`; draw(); });
     shadowAngleInput.addEventListener('input', () => { shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`; draw(); });
+    
     activatePenToolBtn.addEventListener('click', () => {
         isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
             activatePenToolBtn.textContent = 'Deactivate Pen Tool';
             activatePenToolBtn.classList.replace('bg-blue-500', 'bg-orange-500');
             showMessage('Pen tool activated.', 'info');
+            canvas.style.cursor = 'crosshair';
         } else {
             activatePenToolBtn.textContent = 'Activate Pen Tool';
             activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
             isDrawing = false;
             showMessage('Pen tool deactivated.', 'info');
+            canvas.style.cursor = 'default';
         }
         draw();
     });
+
     clearMaskBtn.addEventListener('click', () => {
-        drawingPoints = []; maskPath = null; isDrawing = false;
+        drawingPoints = [];
+        maskPoints = [];
+        maskPath = null;
+        isDrawing = false;
         showMessage('Mask cleared!', 'success');
         draw();
     });
+
     enableOutlineInput.addEventListener('change', draw);
     outlineColorInput.addEventListener('input', () => { outlineHexValueSpan.textContent = outlineColorInput.value; draw(); });
     outlineWidthInput.addEventListener('input', () => { outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`; draw(); });
+    
     zoomSlider.addEventListener('input', (e) => {
         zoomLevel = parseFloat(e.target.value);
         zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
@@ -661,11 +694,12 @@
         canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
         draw();
     });
+
     resetViewBtn.addEventListener('click', () => { initializeControls(); draw(); });
+    
     applyCropBtn.addEventListener('click', () => {
         if (!isImageLoaded) return;
-        const sX = -panOffset.x, sY = -panOffset.y;
-        const sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
+        const sX = -panOffset.x, sY = -panOffset.y, sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = sW; tempCanvas.height = sH;
         const tempCtx = tempCanvas.getContext('2d');
@@ -674,6 +708,7 @@
         loadImage(tempCanvas.toDataURL());
         showMessage('Crop applied!', 'success');
     });
+    
     saveAsJpgBtn.addEventListener('click', () => {
         if (!isImageLoaded) { showMessage('Please upload an image first!', 'error'); return; }
         const link = document.createElement('a');
@@ -682,14 +717,22 @@
         link.click();
         showMessage('Image saved as JPG!', 'success');
     });
+    
     toggleDisclaimerBtn.addEventListener('click', () => {
         isDisclaimerVisible = !isDisclaimerVisible;
         if (isDisclaimerVisible) {
             disclaimerControls.classList.remove('hidden');
             toggleDisclaimerBtn.textContent = 'Remove Disclaimer';
             toggleDisclaimerBtn.classList.replace('bg-blue-500', 'bg-red-500');
-            disclaimerProps.x = canvas.width / 2;
-            disclaimerProps.y = canvas.height - (disclaimerProps.lineHeight * 3 * (canvas.width / 700));
+            
+            const initialWidth = canvas.width * 0.8;
+            disclaimerProps.boxWidth = initialWidth;
+            disclaimerBoxWidthSlider.max = canvas.width;
+            disclaimerBoxWidthSlider.value = initialWidth;
+            disclaimerBoxWidthValue.textContent = `${Math.round(initialWidth)}px`;
+
+            disclaimerProps.x = (canvas.width - initialWidth) / 2;
+            disclaimerProps.y = canvas.height * 0.75;
         } else {
             disclaimerControls.classList.add('hidden');
             toggleDisclaimerBtn.textContent = 'Add Disclaimer';
@@ -697,12 +740,19 @@
         }
         draw();
     });
+
     disclaimerFontSizeSlider.addEventListener('input', (e) => {
-        const size = parseInt(e.target.value, 10);
-        disclaimerProps.fontSize = size;
-        disclaimerFontSizeValue.textContent = `${size}px`;
+        disclaimerProps.fontSize = parseInt(e.target.value, 10);
+        disclaimerFontSizeValue.textContent = `${disclaimerProps.fontSize}px`;
         draw();
     });
+    
+    disclaimerBoxWidthSlider.addEventListener('input', (e) => {
+        disclaimerProps.boxWidth = parseInt(e.target.value, 10);
+        disclaimerBoxWidthValue.textContent = `${disclaimerProps.boxWidth}px`;
+        draw();
+    });
+
     disclaimerColorInput.addEventListener('input', (e) => {
         disclaimerProps.color = e.target.value;
         disclaimerHexValue.textContent = e.target.value;
@@ -711,76 +761,93 @@
 
     canvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(canvas, e);
+
         const bounds = getDisclaimerBounds(ctx);
-        if (bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
-            isDraggingDisclaimer = true;
-            canvas.style.cursor = 'move';
-            disclaimerDragOffset.x = pos.tx - disclaimerProps.x;
-            disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
+        if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
+            isDraggingDisclaimer = true; canvas.style.cursor = 'move';
+            disclaimerDragOffset.x = pos.tx - disclaimerProps.x; disclaimerDragOffset.y = pos.ty - disclaimerProps.y;
             return;
         }
-        if (zoomLevel > 1 && !isPenToolActive) {
-            isPanning = true;
-            startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
-            canvas.style.cursor = 'grabbing';
-            return;
-        }
+
         if (isPenToolActive) {
-            if (!isDrawing) {
-                isDrawing = true;
-                drawingPoints.push({ x: pos.tx, y: pos.ty });
-            } else {
-                const firstPoint = drawingPoints[0];
-                const distance = Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2));
-                const scale = getPenToolScale();
-                const closeThreshold = BASE_PEN_CLOSE_THRESHOLD * scale;
-                if (distance < closeThreshold) {
-                    isDrawing = false;
-                    const path = new Path2D();
-                    path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-                    for (let i = 1; i < drawingPoints.length; i++) { path.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
-                    path.closePath();
-                    maskPath = path;
-                    drawingPoints = [];
-                    showMessage('Mask applied!', 'success');
-                } else {
-                    drawingPoints.push({ x: pos.tx, y: pos.ty });
+            const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
+            for (let i = 0; i < maskPoints.length; i++) {
+                const node = maskPoints[i];
+                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
+                    isDraggingNode = true; draggedNodeIndex = i; canvas.style.cursor = 'grabbing';
+                    return;
                 }
             }
+        }
+        
+        if (zoomLevel > 1 && !isPenToolActive) {
+            isPanning = true; startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y }; canvas.style.cursor = 'grabbing';
+            return;
+        }
+        
+        if (isPenToolActive) {
+            if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; }
+            isDrawing = true;
+            if (drawingPoints.length > 0) {
+                const firstPoint = drawingPoints[0];
+                if (Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2)) < BASE_PEN_CLOSE_THRESHOLD * getPenToolScale()) {
+                    isDrawing = false; maskPoints = [...drawingPoints]; drawingPoints = []; updateMaskFromPoints();
+                    showMessage('Mask applied!', 'success');
+                } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
+            } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
         }
         draw();
     });
 
     canvas.addEventListener('mousemove', (e) => {
+        const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
-            const pos = getMousePos(canvas, e);
-            disclaimerProps.x = pos.tx - disclaimerDragOffset.x;
-            disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
-            draw();
-            return;
+            disclaimerProps.x = pos.tx - disclaimerDragOffset.x; disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
+            draw(); return;
+        }
+        if (isDraggingNode) {
+            maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
+            updateMaskFromPoints(); draw(); return;
         }
         if (isPanning) {
-            const pos = getMousePos(canvas, e);
-            panOffset.x = pos.x - startPanPoint.x;
-            panOffset.y = pos.y - startPanPoint.y;
-            const maxPanX = (canvas.width * zoomLevel - canvas.width);
-            const maxPanY = (canvas.height * zoomLevel - canvas.height);
-            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
-            panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
-            draw();
+            panOffset.x = pos.x - startPanPoint.x; panOffset.y = pos.y - startPanPoint.y;
+            const maxPanX = (canvas.width * zoomLevel - canvas.width), maxPanY = (canvas.height * zoomLevel - canvas.height);
+            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x)); panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+            draw(); return;
         }
+
+        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        let cursorSet = false;
+        
+        if (isPenToolActive && maskPoints.length > 0) {
+            const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
+            for (const node of maskPoints) {
+                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
+                    newCursor = 'grab';
+                    cursorSet = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!cursorSet) {
+            const bounds = getDisclaimerBounds(ctx);
+            if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
+                newCursor = 'move';
+            }
+        }
+        canvas.style.cursor = newCursor;
     });
 
     canvas.addEventListener('mouseup', () => {
-        isPanning = false;
-        isDraggingDisclaimer = false;
-        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
+        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        canvas.style.cursor = newCursor;
     });
     
     canvas.addEventListener('mouseleave', () => {
-        isPanning = false;
-        isDraggingDisclaimer = false;
-        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
+        canvas.style.cursor = 'default';
     });
     
     resetAllBtn.addEventListener('click', () => {
@@ -795,7 +862,8 @@
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
     };
-</script>
+</script> 
+
 
 </body>
 </html>
