@@ -600,6 +600,7 @@
             ctx.restore();
             if (enableOutlineInput.checked) {
                 ctx.save();
+                ctx.globalAlpha = 1.0;  // Ensure full opacity for outline
                 ctx.strokeStyle = outlineColorInput.value;
                 ctx.lineWidth = parseInt(outlineWidthInput.value);
                 ctx.stroke(maskPath);
