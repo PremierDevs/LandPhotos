@@ -465,7 +465,7 @@
         const bounds = getDisclaimerBounds(context);
         if (!bounds) return;
 
-        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        context.fillStyle = 'rgba(0, 0, 0, 0)';
         context.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         
         const scaledFontSize = disclaimerProps.fontSize * scale;
