@@ -335,8 +335,8 @@
     const disclaimerFontSizeValue = document.getElementById('disclaimerFontSizeValue');
     const disclaimerColorInput = document.getElementById('disclaimerColor');
     const disclaimerHexValue = document.getElementById('disclaimerHexValue');
-    const disclaimerBoxWidthSlider = document.getElementById('disclaimerBoxWidth');
-    const disclaimerBoxWidthValue = document.getElementById('disclaimerBoxWidthValue');
+    // const disclaimerBoxWidthSlider = document.getElementById('disclaimerBoxWidth');
+    // const disclaimerBoxWidthValue = document.getElementById('disclaimerBoxWidthValue');
 
 
     // --- State Variables ---
@@ -526,9 +526,9 @@
         disclaimerHexValue.textContent = '#FFFFFF';
         
         disclaimerProps.boxWidth = 500;
-        disclaimerBoxWidthSlider.max = canvas.width || 1000;
-        disclaimerBoxWidthSlider.value = 500;
-        disclaimerBoxWidthValue.textContent = '500px';
+        // disclaimerBoxWidthSlider.max = canvas.width || 1000;
+        // disclaimerBoxWidthSlider.value = 500;
+        // disclaimerBoxWidthValue.textContent = '500px';
     }
 
     function showMessage(message, type = 'info') {
@@ -727,9 +727,9 @@
             
             const initialWidth = canvas.width * 0.8;
             disclaimerProps.boxWidth = initialWidth;
-            disclaimerBoxWidthSlider.max = canvas.width;
-            disclaimerBoxWidthSlider.value = initialWidth;
-            disclaimerBoxWidthValue.textContent = `${Math.round(initialWidth)}px`;
+            // disclaimerBoxWidthSlider.max = canvas.width;
+            // disclaimerBoxWidthSlider.value = initialWidth;
+            // disclaimerBoxWidthValue.textContent = `${Math.round(initialWidth)}px`;
 
             disclaimerProps.x = (canvas.width - initialWidth) / 2;
             disclaimerProps.y = canvas.height * 0.75;
