@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graphics Manipulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -73,6 +71,9 @@
             display: block;
             margin: 0 auto;
             cursor: default;
+        }
+        canvas.eraser-active {
+            cursor: none;
         }
         .control-group {
             background-color: #f8fafc;
@@ -151,7 +152,7 @@
             box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mt-1{margin-top:0.25rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-5{width:1.25rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-t{border-top-width:1px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-500{--tw-bg-opacity:1;background-color:rgb(107 114 128 / var(--tw-bg-opacity, 1))}.bg-gray-700{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94 / var(--tw-bg-opacity, 1))}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-teal-600{--tw-bg-opacity:1;background-color:rgb(13 148 136 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-yellow-800{--tw-bg-opacity:1;background-color:rgb(133 77 14 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity:1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.bg-orange-500{--tw-bg-opacity:1;background-color:rgb(249 115 22 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.p-4{padding:1rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-600:hover{--tw-bg-opacity:1;background-color:rgb(75 85 99 / var(--tw-bg-opacity, 1))}.hover\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74 / var(--tw-bg-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:opacity-80:hover{opacity:0.8}.focus\:border-transparent:focus{border-color:transparent}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}.active\:bg-blue-700:active{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.active\:bg-gray-400:active{--tw-bg-opacity:1;background-color:rgb(156 163 175 / var(--tw-bg-opacity, 1))}.active\:bg-gray-700:active{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.active\:bg-green-700:active{--tw-bg-opacity:1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.active\:bg-red-700:active{--tw-bg-opacity:1;background-color:rgb(185 28 28 / var(--tw-bg-opacity, 1))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}}</style></head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="app-container bg-white rounded-xl shadow-xl">
         <div class="sidebar">
@@ -167,7 +168,7 @@
                 <div class="flex items-center gap-4 mb-3">
                     <label for="overlayColor" class="text-gray-600 font-medium">Color:</label>
                     <input type="color" id="overlayColor" value="#3b82f6" class="flex-shrink-0">
-                    <span id="overlayHexValue" class="text-gray-700 font-mono text-sm">#3b82f6</span>
+                    <span id="overlayHexValue" class="text-gray-700 font-mono text-sm">#000000</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-md font-medium text-gray-600 mb-2">Presets:</h3>
@@ -207,22 +208,22 @@
                     <div>
                         <label for="shadowOpacity" class="block text-gray-600 font-medium mb-1">Opacity:</label>
                         <input type="range" id="shadowOpacity" min="0" max="1" step="0.01" value="0.75" class="w-full">
-                        <span id="shadowOpacityValue" class="block text-right text-gray-700 text-sm mt-1">0.75</span>
+                        <span id="shadowOpacityValue" class="block text-right text-gray-700 text-sm mt-1">0.66</span>
                     </div>
                     <div>
                         <label for="shadowBlur" class="block text-gray-600 font-medium mb-1">Blur:</label>
                         <input type="range" id="shadowBlur" min="0" max="150" step="1" value="10" class="w-full">
-                        <span id="shadowBlurValue" class="block text-right text-gray-700 text-sm mt-1">10px</span>
+                        <span id="shadowBlurValue" class="block text-right text-gray-700 text-sm mt-1">0px</span>
                     </div>
                     <div>
                         <label for="shadowDistance" class="block text-gray-600 font-medium mb-1">Distance:</label>
                         <input type="range" id="shadowDistance" min="0" max="500" step="1" value="5" class="w-full">
-                        <span id="shadowDistanceValue" class="block text-right text-gray-700 text-sm mt-1">5px</span>
+                        <span id="shadowDistanceValue" class="block text-right text-gray-700 text-sm mt-1">38px</span>
                     </div>
                     <div class="sm:col-span-2">
                         <label for="shadowAngle" class="block text-gray-600 font-medium mb-1">Angle:</label>
                         <input type="range" id="shadowAngle" min="0" max="360" step="1" value="45" class="w-full">
-                        <span id="shadowAngleValue" class="block text-right text-gray-700 text-sm mt-1">45°</span>
+                        <span id="shadowAngleValue" class="block text-right text-gray-700 text-sm mt-1">259°</span>
                     </div>
                 </div>
             </div>
@@ -241,12 +242,26 @@
                 <div>
                     <label for="outlineWidth" class="block text-gray-600 font-medium mb-2">Width:</label>
                     <input type="range" id="outlineWidth" min="0" max="100" step="1" value="2" class="w-full">
-                    <span id="outlineWidthValue" class="block text-right text-gray-700 text-sm mt-1">2px</span>
+                    <span id="outlineWidthValue" class="block text-right text-gray-700 text-sm mt-1">9px</span>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h3 class="text-md font-medium text-gray-600 mb-2">Erase Outline Sections</h3>
+                    <p class="text-sm text-gray-500 mb-3">Paint over the property line to hide it where it covers a house, barn, or other structure.</p>
+                    <button id="activateOutlineEraser" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Activate Eraser</button>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                        <button id="undoOutlineEraser" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 active:bg-gray-700">Undo Last</button>
+                        <button id="clearOutlineEraser" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 active:bg-red-700">Restore Line</button>
+                    </div>
+                    <div class="mt-3">
+                        <label for="eraserBrushSize" class="block text-gray-600 font-medium mb-2">Brush Size:</label>
+                        <input type="range" id="eraserBrushSize" min="8" max="120" step="1" value="28" class="w-full">
+                        <span id="eraserBrushSizeValue" class="block text-right text-gray-700 text-sm mt-1">28px</span>
+                    </div>
                 </div>
             </div>
             
             <div class="control-group">
-                <h2 class="text-lg font-semibold text-gray-700 mb-3">Zoom & Crop</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Zoom &amp; Crop</h2>
                 <div>
                     <label for="zoomSlider" class="block text-gray-600 font-medium mb-1">Zoom:</label>
                     <input type="range" id="zoomSlider" min="1" max="3" step="0.01" value="1" class="w-full">
@@ -290,8 +305,8 @@
         </div>
 
         <div class="main-content">
-            <canvas id="imageCanvas"></canvas>
-            <div id="messageBox" class="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md hidden"></div>
+            <canvas id="imageCanvas" width="1200" height="946" style="width: 100%; height: auto; cursor: default;" class=""></canvas>
+            <div id="messageBox" class="mt-4 p-3 rounded-md bg-green-100 text-green-800 hidden">Image saved as JPG!</div>
         </div>
     </div>
 
@@ -323,6 +338,11 @@
     const outlineHexValueSpan = document.getElementById('outlineHexValue');
     const outlineWidthInput = document.getElementById('outlineWidth');
     const outlineWidthValueSpan = document.getElementById('outlineWidthValue');
+    const activateOutlineEraserBtn = document.getElementById('activateOutlineEraser');
+    const undoOutlineEraserBtn = document.getElementById('undoOutlineEraser');
+    const clearOutlineEraserBtn = document.getElementById('clearOutlineEraser');
+    const eraserBrushSizeInput = document.getElementById('eraserBrushSize');
+    const eraserBrushSizeValueSpan = document.getElementById('eraserBrushSizeValue');
     const saveAsJpgBtn = document.getElementById('saveAsJpg');
     const resetAllBtn = document.getElementById('resetAll');
     const zoomSlider = document.getElementById('zoomSlider');
@@ -356,6 +376,15 @@
     let isDraggingNode = false;
     let draggedNodeIndex = -1;
 
+    // Outline Eraser State
+    let isOutlineEraserActive = false;
+    let isErasingOutline = false;
+    let outlineEraserStrokes = [];
+    let currentEraserStroke = null;
+    let eraserCursorPos = null;
+    const outlineLayerCanvas = document.createElement('canvas');
+    const outlineLayerCtx = outlineLayerCanvas.getContext('2d');
+
     // Disclaimer State
     const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
     let isDisclaimerVisible = false;
@@ -380,6 +409,7 @@
     const defaultEnableOutline = false;
     const defaultOutlineColor = '#ffffff';
     const defaultOutlineWidth = 2;
+    const defaultEraserBrushSize = 28;
     const defaultImageUrl = 'https://placehold.co/700x500/A0B0C0/FFFFFF?text=Upload+Image';
     const BASE_PEN_LINE_WIDTH = 3;
     const BASE_PEN_POINT_RADIUS = 6;
@@ -420,6 +450,134 @@
         for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
         path.closePath();
         maskPath = path;
+    }
+
+    function getEraserBrushSize() {
+        return parseInt(eraserBrushSizeInput.value, 10) * getPenToolScale();
+    }
+
+    function getAllEraserStrokes() {
+        const strokes = outlineEraserStrokes.slice();
+        if (currentEraserStroke && currentEraserStroke.points.length > 0) {
+            strokes.push(currentEraserStroke);
+        }
+        return strokes;
+    }
+
+    function paintEraserStroke(targetCtx, stroke) {
+        if (!stroke || !stroke.points.length) return;
+        const size = stroke.size;
+        targetCtx.beginPath();
+        if (stroke.points.length === 1) {
+            targetCtx.arc(stroke.points[0].x, stroke.points[0].y, size / 2, 0, Math.PI * 2);
+            targetCtx.fill();
+        } else {
+            targetCtx.lineWidth = size;
+            targetCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
+            for (let i = 1; i < stroke.points.length; i++) {
+                targetCtx.lineTo(stroke.points[i].x, stroke.points[i].y);
+            }
+            targetCtx.stroke();
+        }
+    }
+
+    function clearOutlineEraserStrokes() {
+        outlineEraserStrokes = [];
+        currentEraserStroke = null;
+        isErasingOutline = false;
+    }
+
+    function finishCurrentEraserStroke() {
+        if (currentEraserStroke && currentEraserStroke.points.length > 0) {
+            outlineEraserStrokes.push(currentEraserStroke);
+        }
+        currentEraserStroke = null;
+        isErasingOutline = false;
+    }
+
+    function deactivatePenTool() {
+        if (!isPenToolActive) return;
+        isPenToolActive = false;
+        isDrawing = false;
+        activatePenToolBtn.textContent = 'Activate Pen Tool';
+        activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
+    }
+
+    function deactivateOutlineEraser() {
+        if (!isOutlineEraserActive) return;
+        finishCurrentEraserStroke();
+        isOutlineEraserActive = false;
+        eraserCursorPos = null;
+        activateOutlineEraserBtn.textContent = 'Activate Eraser';
+        activateOutlineEraserBtn.classList.replace('bg-orange-500', 'bg-blue-500');
+        canvas.classList.remove('eraser-active');
+    }
+
+    function updateCanvasCursor() {
+        if (isOutlineEraserActive) {
+            canvas.classList.add('eraser-active');
+            canvas.style.cursor = 'none';
+        } else {
+            canvas.classList.remove('eraser-active');
+            canvas.style.cursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        }
+    }
+
+    function drawMaskOutline(targetCtx) {
+        if (!enableOutlineInput.checked || !maskPath) return;
+
+        const strokes = getAllEraserStrokes();
+        const lineWidth = parseInt(outlineWidthInput.value, 10);
+
+        if (strokes.length === 0) {
+            targetCtx.save();
+            targetCtx.globalAlpha = 1.0;
+            targetCtx.strokeStyle = outlineColorInput.value;
+            targetCtx.lineWidth = lineWidth;
+            targetCtx.stroke(maskPath);
+            targetCtx.restore();
+            return;
+        }
+
+        if (outlineLayerCanvas.width !== canvas.width || outlineLayerCanvas.height !== canvas.height) {
+            outlineLayerCanvas.width = canvas.width;
+            outlineLayerCanvas.height = canvas.height;
+        }
+        outlineLayerCtx.setTransform(1, 0, 0, 1, 0, 0);
+        outlineLayerCtx.clearRect(0, 0, outlineLayerCanvas.width, outlineLayerCanvas.height);
+        outlineLayerCtx.strokeStyle = outlineColorInput.value;
+        outlineLayerCtx.lineWidth = lineWidth;
+        outlineLayerCtx.stroke(maskPath);
+
+        outlineLayerCtx.save();
+        outlineLayerCtx.globalCompositeOperation = 'destination-out';
+        outlineLayerCtx.strokeStyle = '#000';
+        outlineLayerCtx.fillStyle = '#000';
+        outlineLayerCtx.lineCap = 'round';
+        outlineLayerCtx.lineJoin = 'round';
+        for (const stroke of strokes) {
+            paintEraserStroke(outlineLayerCtx, stroke);
+        }
+        outlineLayerCtx.restore();
+
+        targetCtx.drawImage(outlineLayerCanvas, 0, 0);
+    }
+
+    function drawEraserBrushPreview(targetCtx) {
+        if (!isOutlineEraserActive || !eraserCursorPos) return;
+        const radius = getEraserBrushSize() / 2;
+        targetCtx.save();
+        targetCtx.beginPath();
+        targetCtx.arc(eraserCursorPos.x, eraserCursorPos.y, radius, 0, Math.PI * 2);
+        targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        targetCtx.lineWidth = 2 / zoomLevel;
+        targetCtx.stroke();
+        targetCtx.beginPath();
+        targetCtx.arc(eraserCursorPos.x, eraserCursorPos.y, radius, 0, Math.PI * 2);
+        targetCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        targetCtx.setLineDash([4 / zoomLevel, 4 / zoomLevel]);
+        targetCtx.stroke();
+        targetCtx.restore();
     }
 
     function getDisclaimerLines(context) {
@@ -506,6 +664,10 @@
         outlineHexValueSpan.textContent = defaultOutlineColor;
         outlineWidthInput.value = defaultOutlineWidth;
         outlineWidthValueSpan.textContent = `${defaultOutlineWidth}px`;
+        eraserBrushSizeInput.value = defaultEraserBrushSize;
+        eraserBrushSizeValueSpan.textContent = `${defaultEraserBrushSize}px`;
+        deactivateOutlineEraser();
+        clearOutlineEraserStrokes();
         
         zoomSlider.value = 1.0;
         zoomValueSpan.textContent = '100%';
@@ -557,7 +719,9 @@
         originalImage.src = src;
     }
 
-    function draw() {
+    function draw(options = {}) {
+        const isExport = options.isExport === true;
+
         if (!isImageLoaded) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#f0f0f0';
@@ -598,44 +762,41 @@
             ctx.shadowOffsetY = sd * Math.sin(sa);
             ctx.drawImage(tempCanvas, 0, 0);
             ctx.restore();
-            if (enableOutlineInput.checked) {
-                ctx.save();
-                ctx.globalAlpha = 1.0;  // Ensure full opacity for outline
-                ctx.strokeStyle = outlineColorInput.value;
-                ctx.lineWidth = parseInt(outlineWidthInput.value);
-                ctx.stroke(maskPath);
-                ctx.restore();
-            }
+            drawMaskOutline(ctx);
         }
 
-        const scale = getPenToolScale();
-        if (isDrawing && drawingPoints.length > 0) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-            ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
-            ctx.beginPath();
-            ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-            for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-            drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
-            if (drawingPoints.length > 0) {
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+        if (!isExport) {
+            const scale = getPenToolScale();
+            if (isDrawing && drawingPoints.length > 0) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+                ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
                 ctx.beginPath();
-                ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+                for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+                drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+                if (drawingPoints.length > 0) {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
-        }
-        
-        if (isPenToolActive && maskPoints.length > 0) {
-            ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
-            ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
-            ctx.beginPath();
-            ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
-            for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
-            ctx.closePath();
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
-            maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+            
+            if (isPenToolActive && maskPoints.length > 0) {
+                ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
+                ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
+                ctx.beginPath();
+                ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
+                for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
+                maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+            }
+
+            drawEraserBrushPreview(ctx);
         }
         
         drawDisclaimerAndBox(ctx);
@@ -658,19 +819,17 @@
     shadowAngleInput.addEventListener('input', () => { shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`; draw(); });
     
     activatePenToolBtn.addEventListener('click', () => {
-        isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
+            deactivatePenTool();
+            showMessage('Pen tool deactivated.', 'info');
+        } else {
+            deactivateOutlineEraser();
+            isPenToolActive = true;
             activatePenToolBtn.textContent = 'Deactivate Pen Tool';
             activatePenToolBtn.classList.replace('bg-blue-500', 'bg-orange-500');
             showMessage('Pen tool activated.', 'info');
-            canvas.style.cursor = 'crosshair';
-        } else {
-            activatePenToolBtn.textContent = 'Activate Pen Tool';
-            activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
-            isDrawing = false;
-            showMessage('Pen tool deactivated.', 'info');
-            canvas.style.cursor = 'default';
         }
+        updateCanvasCursor();
         draw();
     });
 
@@ -679,8 +838,57 @@
         maskPoints = [];
         maskPath = null;
         isDrawing = false;
+        clearOutlineEraserStrokes();
         showMessage('Mask cleared!', 'success');
         draw();
+    });
+
+    activateOutlineEraserBtn.addEventListener('click', () => {
+        if (isOutlineEraserActive) {
+            deactivateOutlineEraser();
+            showMessage('Outline eraser deactivated.', 'info');
+        } else {
+            if (!maskPath) {
+                showMessage('Draw a property mask and enable the outline first.', 'error');
+                return;
+            }
+            deactivatePenTool();
+            isOutlineEraserActive = true;
+            activateOutlineEraserBtn.textContent = 'Deactivate Eraser';
+            activateOutlineEraserBtn.classList.replace('bg-blue-500', 'bg-orange-500');
+            if (!enableOutlineInput.checked) {
+                enableOutlineInput.checked = true;
+            }
+            showMessage('Paint over the property line to hide it over buildings.', 'info');
+        }
+        updateCanvasCursor();
+        draw();
+    });
+
+    undoOutlineEraserBtn.addEventListener('click', () => {
+        if (isErasingOutline) finishCurrentEraserStroke();
+        if (outlineEraserStrokes.length === 0) {
+            showMessage('Nothing to undo.', 'info');
+            return;
+        }
+        outlineEraserStrokes.pop();
+        showMessage('Last erase undone.', 'success');
+        draw();
+    });
+
+    clearOutlineEraserBtn.addEventListener('click', () => {
+        if (outlineEraserStrokes.length === 0 && !currentEraserStroke) {
+            showMessage('No erased sections to restore.', 'info');
+            return;
+        }
+        clearOutlineEraserStrokes();
+        showMessage('Property line restored.', 'success');
+        draw();
+    });
+
+    eraserBrushSizeInput.addEventListener('input', () => {
+        eraserBrushSizeValueSpan.textContent = `${eraserBrushSizeInput.value}px`;
+        if (isOutlineEraserActive) draw();
     });
 
     enableOutlineInput.addEventListener('change', draw);
@@ -711,10 +919,12 @@
     
     saveAsJpgBtn.addEventListener('click', () => {
         if (!isImageLoaded) { showMessage('Please upload an image first!', 'error'); return; }
+        draw({ isExport: true });
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/jpeg', 0.9);
         link.download = 'graphics_manipulated.jpg';
         link.click();
+        draw();
         showMessage('Image saved as JPG!', 'success');
     });
     
@@ -769,6 +979,16 @@
             return;
         }
 
+        if (isOutlineEraserActive) {
+            isErasingOutline = true;
+            currentEraserStroke = {
+                points: [{ x: pos.tx, y: pos.ty }],
+                size: getEraserBrushSize()
+            };
+            draw();
+            return;
+        }
+
         if (isPenToolActive) {
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             for (let i = 0; i < maskPoints.length; i++) {
@@ -780,13 +1000,13 @@
             }
         }
         
-        if (zoomLevel > 1 && !isPenToolActive) {
+        if (zoomLevel > 1 && !isPenToolActive && !isOutlineEraserActive) {
             isPanning = true; startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y }; canvas.style.cursor = 'grabbing';
             return;
         }
         
         if (isPenToolActive) {
-            if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; }
+            if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; clearOutlineEraserStrokes(); }
             isDrawing = true;
             if (drawingPoints.length > 0) {
                 const firstPoint = drawingPoints[0];
@@ -809,11 +1029,22 @@
             maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
             updateMaskFromPoints(); draw(); return;
         }
+        if (isErasingOutline && currentEraserStroke) {
+            currentEraserStroke.points.push({ x: pos.tx, y: pos.ty });
+            eraserCursorPos = { x: pos.tx, y: pos.ty };
+            draw(); return;
+        }
         if (isPanning) {
             panOffset.x = pos.x - startPanPoint.x; panOffset.y = pos.y - startPanPoint.y;
             const maxPanX = (canvas.width * zoomLevel - canvas.width), maxPanY = (canvas.height * zoomLevel - canvas.height);
             panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x)); panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
             draw(); return;
+        }
+
+        if (isOutlineEraserActive) {
+            eraserCursorPos = { x: pos.tx, y: pos.ty };
+            draw();
+            return;
         }
 
         let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
@@ -840,14 +1071,28 @@
     });
 
     canvas.addEventListener('mouseup', () => {
+        if (isErasingOutline) finishCurrentEraserStroke();
         isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
-        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
-        canvas.style.cursor = newCursor;
+        updateCanvasCursor();
+        draw();
     });
     
     canvas.addEventListener('mouseleave', () => {
+        if (isErasingOutline) finishCurrentEraserStroke();
         isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
-        canvas.style.cursor = 'default';
+        eraserCursorPos = null;
+        if (!isOutlineEraserActive) canvas.style.cursor = 'default';
+        draw();
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+            if (outlineEraserStrokes.length === 0) return;
+            e.preventDefault();
+            if (isErasingOutline) finishCurrentEraserStroke();
+            outlineEraserStrokes.pop();
+            draw();
+        }
     });
     
     resetAllBtn.addEventListener('click', () => {
@@ -865,5 +1110,6 @@
 </script> 
 
 
-</body>
-</html>
+
+
+</body></html>
