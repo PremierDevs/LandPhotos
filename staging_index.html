@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graphics Manipulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -37,21 +35,102 @@
         }
         .sidebar {
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             background-color: #f8fafc;
             border-radius: 0.75rem;
             padding: 1rem;
             box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-            overflow-y: auto;
+            overflow: hidden;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 0.75rem;
         }
         @media (min-width: 1024px) {
             .sidebar {
-                height: auto;
+                align-self: stretch;
+                height: calc(90vh - 2rem);
+                max-height: calc(90vh - 2rem);
+                min-height: 0;
             }
+        }
+        .sidebar-header {
+            flex-shrink: 0;
+        }
+        .step-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.35rem;
+            flex-shrink: 0;
+        }
+        .step-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.05rem;
+            padding: 0.4rem 0.15rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            box-shadow: none;
+        }
+        .step-tab .step-num {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        .step-tab.is-active {
+            background: #3b82f6;
+            border-color: #2563eb;
+            color: #ffffff;
+        }
+        .step-tab.is-active .step-num {
+            color: #dbeafe;
+        }
+        .step-tab:hover,
+        .step-tab:active,
+        #prevStepBtn:hover,
+        #nextStepBtn:hover {
+            transform: none;
+        }
+        .step-tab:disabled,
+        #prevStepBtn:disabled,
+        #nextStepBtn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .sidebar-body {
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+        }
+        .step-panel {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .step-panel.is-active {
+            display: flex;
+        }
+        .sidebar-footer {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .step-nav {
+            display: flex;
+            gap: 0.5rem;
         }
         .main-content {
             flex-grow: 1;
@@ -73,6 +152,75 @@
             display: block;
             margin: 0 auto;
             cursor: default;
+        }
+        canvas.eraser-active {
+            cursor: none;
+        }
+        .help-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 4vh 16px 16px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+        .help-overlay.is-open {
+            display: flex;
+        }
+        .help-panel {
+            width: min(720px, 100%);
+            max-height: 92vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        #helpBody {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            max-height: calc(92vh - 10rem);
+        }
+        .help-panel kbd {
+            display: inline-block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1.2;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-bottom-width: 2px;
+            border-radius: 0.375rem;
+            padding: 0.12rem 0.4rem;
+            color: #334155;
+            white-space: nowrap;
+        }
+        .help-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .help-row:last-child {
+            border-bottom: none;
+        }
+        .help-keys {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+        #openHelpBtn:hover,
+        #closeHelpBtn:hover {
+            transform: none;
         }
         .control-group {
             background-color: #f8fafc;
@@ -151,15 +299,31 @@
             box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-5{width:1.25rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-500{--tw-bg-opacity:1;background-color:rgb(107 114 128 / var(--tw-bg-opacity, 1))}.bg-gray-700{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94 / var(--tw-bg-opacity, 1))}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-teal-600{--tw-bg-opacity:1;background-color:rgb(13 148 136 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-yellow-800{--tw-bg-opacity:1;background-color:rgb(133 77 14 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity:1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.p-4{padding:1rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-3{padding-bottom:0.75rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-wide{letter-spacing:0.025em}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-200:hover{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-600:hover{--tw-bg-opacity:1;background-color:rgb(75 85 99 / var(--tw-bg-opacity, 1))}.hover\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74 / var(--tw-bg-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:opacity-80:hover{opacity:0.8}.focus\:border-transparent:focus{border-color:transparent}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}.active\:bg-blue-700:active{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.active\:bg-gray-400:active{--tw-bg-opacity:1;background-color:rgb(156 163 175 / var(--tw-bg-opacity, 1))}.active\:bg-gray-700:active{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.active\:bg-green-700:active{--tw-bg-opacity:1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.active\:bg-red-700:active{--tw-bg-opacity:1;background-color:rgb(185 28 28 / var(--tw-bg-opacity, 1))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}}</style></head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="app-container bg-white rounded-xl shadow-xl">
         <div class="sidebar">
-            <h1 class="text-2xl font-bold text-gray-800 text-center mb-4">Image Editor Tools</h1>
+            <div class="sidebar-header">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <h1 class="text-2xl font-bold text-gray-800">Image Editor Tools</h1>
+                    <button type="button" id="openHelpBtn" class="flex-shrink-0 bg-white text-gray-700 border border-gray-300 py-1.5 px-3 rounded-lg text-sm font-semibold hover:bg-gray-50">Help</button>
+                </div>
+                <p class="text-xs text-gray-500 text-center">Press <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-semibold">Ctrl</kbd>/<kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-semibold">⌘</kbd> + <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-semibold">K</kbd> for shortcuts</p>
+            </div>
 
+            <div class="step-tabs" role="tablist" aria-label="Editor steps">
+                <button type="button" class="step-tab is-active" data-step-tab="0" aria-selected="true"><span class="step-num">1</span>Photo</button>
+                <button type="button" class="step-tab" data-step-tab="1" aria-selected="false"><span class="step-num">2</span>Lot</button>
+                <button type="button" class="step-tab" data-step-tab="2" aria-selected="false"><span class="step-num">3</span>Line</button>
+                <button type="button" class="step-tab" data-step-tab="3" aria-selected="false"><span class="step-num">4</span>Finish</button>
+            </div>
+
+            <div class="sidebar-body">
+            <div class="step-panel is-active" data-step-panel="0">
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Image Source</h2>
                 <input type="file" id="imageUpload" accept="image/*" class="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="text-sm text-gray-500 mt-2">Or drag and drop an image onto the canvas.</p>
             </div>
 
             <div class="control-group">
@@ -168,6 +332,11 @@
                     <label for="overlayColor" class="text-gray-600 font-medium">Color:</label>
                     <input type="color" id="overlayColor" value="#3b82f6" class="flex-shrink-0">
                     <span id="overlayHexValue" class="text-gray-700 font-mono text-sm">#3b82f6</span>
+                </div>
+                <div>
+                    <label for="overlayOpacity" class="block text-gray-600 font-medium mb-2">Opacity:</label>
+                    <input type="range" id="overlayOpacity" min="0" max="1" step="0.01" value="0.5" class="w-full">
+                    <span id="overlayOpacityValue" class="block text-right text-gray-700 text-sm mt-1">0.50</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-md font-medium text-gray-600 mb-2">Presets:</h3>
@@ -180,20 +349,18 @@
                         <button class="overlay-preset-btn bg-purple-600 text-white py-2 px-3 rounded-md text-sm font-medium hover:opacity-80" data-color="#800080">Purple</button>
                     </div>
                 </div>
-                <div>
-                    <label for="overlayOpacity" class="block text-gray-600 font-medium mb-2 mt-4">Opacity:</label>
-                    <input type="range" id="overlayOpacity" min="0" max="1" step="0.01" value="0.5" class="w-full">
-                    <span id="overlayOpacityValue" class="block text-right text-gray-700 text-sm mt-1">0.50</span>
-                </div>
+            </div>
             </div>
 
+            <div class="step-panel" data-step-panel="1">
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Pen Tool (Top Layer Mask)</h2>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button id="activatePenTool" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Activate Pen Tool</button>
-                    <button id="clearMask" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 active:bg-red-700">Clear Mask</button>
+                    <button id="closePath" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-600 active:bg-green-700">Close Path</button>
                 </div>
-                <p class="text-sm text-gray-500 mt-3">Click on the canvas to draw points. Click the first point to close the path.</p>
+                <button id="clearMask" class="w-full mt-3 bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 active:bg-red-700">Clear Mask</button>
+                <p class="text-sm text-gray-500 mt-3">Click to place points. Close with the first point, double-click, Close Path, or Enter. Drag a vertex to move it, click an edge to add one, Alt-click to delete.</p>
             </div>
 
             <div class="control-group">
@@ -226,7 +393,9 @@
                     </div>
                 </div>
             </div>
+            </div>
 
+            <div class="step-panel" data-step-panel="2">
             <div class="control-group">
                 <h2 class="text-lg font-semibold text-gray-700 mb-3">Masked Layer Outline</h2>
                 <div class="flex items-center gap-2 mb-3">
@@ -243,16 +412,36 @@
                     <input type="range" id="outlineWidth" min="0" max="100" step="1" value="2" class="w-full">
                     <span id="outlineWidthValue" class="block text-right text-gray-700 text-sm mt-1">2px</span>
                 </div>
+                <div class="flex items-center gap-2 mt-3">
+                    <input type="checkbox" id="enableDashedOutline" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <label for="enableDashedOutline" class="text-gray-600 font-medium">Dashed Line</label>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h3 class="text-md font-medium text-gray-600 mb-2">Erase Outline Sections</h3>
+                    <p class="text-sm text-gray-500 mb-3">Paint over the property line to hide it where it covers a house, barn, or other structure.</p>
+                    <button id="activateOutlineEraser" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Activate Eraser</button>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                        <button id="undoOutlineEraser" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 active:bg-gray-700">Undo</button>
+                        <button id="clearOutlineEraser" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 active:bg-red-700">Restore Line</button>
+                    </div>
+                    <div class="mt-3">
+                        <label for="eraserBrushSize" class="block text-gray-600 font-medium mb-2">Brush Size:</label>
+                        <input type="range" id="eraserBrushSize" min="8" max="120" step="1" value="28" class="w-full">
+                        <span id="eraserBrushSizeValue" class="block text-right text-gray-700 text-sm mt-1">28px</span>
+                    </div>
+                </div>
             </div>
-            
+            </div>
+
+            <div class="step-panel" data-step-panel="3">
             <div class="control-group">
-                <h2 class="text-lg font-semibold text-gray-700 mb-3">Zoom & Crop</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Zoom &amp; Crop</h2>
                 <div>
                     <label for="zoomSlider" class="block text-gray-600 font-medium mb-1">Zoom:</label>
-                    <input type="range" id="zoomSlider" min="1" max="3" step="0.01" value="1" class="w-full">
+                    <input type="range" id="zoomSlider" min="1" max="10" step="0.01" value="1" class="w-full">
                     <span id="zoomValue" class="block text-right text-gray-700 text-sm mt-1">100%</span>
                 </div>
-                <p class="text-sm text-gray-500 mt-3">When zoomed in, click and drag the image to pan.</p>
+                <p class="text-sm text-gray-500 mt-3">Scroll to zoom. Space+drag pans even while drawing or erasing.</p>
                 <div class="flex flex-col sm:flex-row gap-3 mt-4">
                     <button id="applyCrop" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Apply Crop</button>
                     <button id="resetView" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-600 active:bg-gray-700">Reset View</button>
@@ -265,6 +454,10 @@
                     <button id="toggleDisclaimer" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 active:bg-blue-700">Add Disclaimer</button>
                 </div>
                 <div id="disclaimerControls" class="hidden mt-4 space-y-4">
+                    <div>
+                        <label for="disclaimerTextInput" class="block text-gray-600 font-medium mb-1">Text:</label>
+                        <textarea id="disclaimerTextInput" rows="3" class="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.</textarea>
+                    </div>
                     <div>
                         <label for="disclaimerFontSize" class="block text-gray-600 font-medium mb-1">Font Size:</label>
                         <input type="range" id="disclaimerFontSize" min="12" max="72" step="1" value="24" class="w-full">
@@ -282,16 +475,146 @@
                     </div>
                 </div>
             </div>
+            </div>
+            </div>
 
-            <div class="flex flex-col gap-3 mt-4">
+            <div class="sidebar-footer">
+                <div class="step-nav">
+                    <button type="button" id="prevStepBtn" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-semibold hover:bg-gray-300" disabled="">Back</button>
+                    <button type="button" id="nextStepBtn" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600">Next</button>
+                </div>
                 <button id="saveAsJpg" class="bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 active:bg-green-700 w-full">Save as JPG</button>
                 <button id="resetAll" class="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 active:bg-gray-400 w-full">Reset All</button>
             </div>
         </div>
 
         <div class="main-content">
-            <canvas id="imageCanvas"></canvas>
-            <div id="messageBox" class="mt-4 p-3 bg-blue-100 text-blue-800 rounded-md hidden"></div>
+            <canvas id="imageCanvas" width="700" height="500" style="width: 100%; height: auto; cursor: default;"></canvas>
+            <div id="messageBox" class="mt-4 p-3 rounded-md bg-green-100 text-green-800 hidden">Image loaded successfully!</div>
+        </div>
+    </div>
+
+    <div id="helpOverlay" class="help-overlay">
+        <div class="help-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+            <div class="px-5 pt-4 pb-3 border-b border-gray-200">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 id="helpTitle" class="text-xl font-bold text-gray-800">Help &amp; shortcuts</h2>
+                        <p class="text-sm text-gray-500 mt-1">Trace a property, draw the boundary line, and hide the line where it covers a building.</p>
+                    </div>
+                    <button type="button" id="closeHelpBtn" class="flex-shrink-0 bg-gray-100 text-gray-700 py-1.5 px-3 rounded-lg text-sm font-semibold hover:bg-gray-200">Close</button>
+                </div>
+                <input type="search" id="helpSearch" placeholder="Search tools and shortcuts…" class="mt-3 w-full text-gray-700 bg-gray-50 border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
+            </div>
+            <div id="helpBody" class="px-5 py-4 overflow-y-auto space-y-5 text-sm text-gray-700">
+                <section data-help-section="">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Workflow</h3>
+                    <div class="help-row" data-help-item="steps photo lot line finish next back toolbar">
+                        <span>Use the Photo, Lot, Line, and Finish tabs — or Back/Next. Save stays at the bottom. Click any step at any time.</span>
+                    </div>
+                </section>
+
+                <section data-help-section="">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Keyboard</h3>
+                    <div class="help-row" data-help-item="help menu shortcuts ctrl cmd k escape close">
+                        <span>Open or close this help menu</span>
+                        <span class="help-keys"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="help menu question mark">
+                        <span>Open help</span>
+                        <span class="help-keys"><kbd>?</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="close help escape">
+                        <span>Close help</span>
+                        <span class="help-keys"><kbd>Esc</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="undo ctrl cmd z">
+                        <span>Undo last edit (points, drags, eraser)</span>
+                        <span class="help-keys"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="redo ctrl cmd shift z y">
+                        <span>Redo</span>
+                        <span class="help-keys"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Y</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="close path enter pen drawing">
+                        <span>Close the pen path (while drawing)</span>
+                        <span class="help-keys"><kbd>Enter</kbd></span>
+                    </div>
+                    <div class="help-row" data-help-item="pan space drag zoom">
+                        <span>Pan while zoomed, even with pen or eraser on</span>
+                        <span class="help-keys"><kbd>Space</kbd> + drag</span>
+                    </div>
+                    <div class="help-row" data-help-item="pan middle mouse zoom">
+                        <span>Pan while zoomed</span>
+                        <span class="help-keys">Middle-click + drag</span>
+                    </div>
+                    <div class="help-row" data-help-item="zoom scroll wheel">
+                        <span>Zoom toward the cursor</span>
+                        <span class="help-keys">Scroll wheel</span>
+                    </div>
+                </section>
+
+                <section data-help-section="">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Pen / property mask</h3>
+                    <div class="help-row" data-help-item="pen tool draw points polygon mask property">
+                        <span>Activate the pen, then click around the property to place points.</span>
+                    </div>
+                    <div class="help-row" data-help-item="close path first point double click enter">
+                        <span>Finish the shape by clicking the first point, double-clicking, Close Path, or Enter.</span>
+                    </div>
+                    <div class="help-row" data-help-item="move drag vertices nodes">
+                        <span>Drag a vertex to move it. The mask stays put if you click empty canvas.</span>
+                    </div>
+                    <div class="help-row" data-help-item="add insert vertex edge click">
+                        <span>Click a mask edge to insert a point.</span>
+                    </div>
+                    <div class="help-row" data-help-item="delete vertex alt option click">
+                        <span>Delete a vertex (keeps at least 3)</span>
+                        <span class="help-keys"><kbd>Alt</kbd> + click vertex</span>
+                    </div>
+                    <div class="help-row" data-help-item="clear mask">
+                        <span>Clear Mask removes the property shape and erased line sections (asks first).</span>
+                    </div>
+                </section>
+
+                <section data-help-section="">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Outline &amp; eraser</h3>
+                    <div class="help-row" data-help-item="outline property line color width dashed">
+                        <span>Enable Outline for the boundary line. Set color, width, and optional dashes.</span>
+                    </div>
+                    <div class="help-row" data-help-item="erase outline house barn building hide line">
+                        <span>Activate Eraser and paint over the line where it covers a house, barn, or other structure.</span>
+                    </div>
+                    <div class="help-row" data-help-item="restore line eraser">
+                        <span>Restore Line brings the full outline back. Undo steps back one edit at a time.</span>
+                    </div>
+                </section>
+
+                <section data-help-section="">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Image, overlay &amp; export</h3>
+                    <div class="help-row" data-help-item="upload drag drop image source">
+                        <span>Choose a file or drag an image onto the canvas.</span>
+                    </div>
+                    <div class="help-row" data-help-item="color overlay opacity outside property">
+                        <span>Color Overlay tints everything outside the mask so the parcel reads clearly.</span>
+                    </div>
+                    <div class="help-row" data-help-item="drop shadow blur distance angle">
+                        <span>Drop Shadow lifts the masked property off the overlay.</span>
+                    </div>
+                    <div class="help-row" data-help-item="zoom crop pan reset view">
+                        <span>Zoom, pan, then Apply Crop. Crop keeps the mask and erased line sections.</span>
+                    </div>
+                    <div class="help-row" data-help-item="disclaimer text drag color">
+                        <span>Add Disclaimer, edit the wording, then drag it on the photo.</span>
+                    </div>
+                    <div class="help-row" data-help-item="save jpg export">
+                        <span>Save as JPG downloads the finished image without tool handles or the eraser cursor.</span>
+                    </div>
+                </section>
+            </div>
+            <div class="px-5 py-3 border-t border-gray-200 text-xs text-gray-500">
+                Tip: finish the mask before erasing the line. Use a larger brush on thick outlines.
+            </div>
         </div>
     </div>
 
@@ -307,6 +630,7 @@
     const overlayOpacityValueSpan = document.getElementById('overlayOpacityValue');
     const overlayPresetBtns = document.querySelectorAll('.overlay-preset-btn');
     const activatePenToolBtn = document.getElementById('activatePenTool');
+    const closePathBtn = document.getElementById('closePath');
     const clearMaskBtn = document.getElementById('clearMask');
     const shadowColorInput = document.getElementById('shadowColor');
     const shadowHexValueSpan = document.getElementById('shadowHexValue');
@@ -319,10 +643,16 @@
     const shadowAngleInput = document.getElementById('shadowAngle');
     const shadowAngleValueSpan = document.getElementById('shadowAngleValue');
     const enableOutlineInput = document.getElementById('enableOutline');
+    const enableDashedOutlineInput = document.getElementById('enableDashedOutline');
     const outlineColorInput = document.getElementById('outlineColor');
     const outlineHexValueSpan = document.getElementById('outlineHexValue');
     const outlineWidthInput = document.getElementById('outlineWidth');
     const outlineWidthValueSpan = document.getElementById('outlineWidthValue');
+    const activateOutlineEraserBtn = document.getElementById('activateOutlineEraser');
+    const undoOutlineEraserBtn = document.getElementById('undoOutlineEraser');
+    const clearOutlineEraserBtn = document.getElementById('clearOutlineEraser');
+    const eraserBrushSizeInput = document.getElementById('eraserBrushSize');
+    const eraserBrushSizeValueSpan = document.getElementById('eraserBrushSizeValue');
     const saveAsJpgBtn = document.getElementById('saveAsJpg');
     const resetAllBtn = document.getElementById('resetAll');
     const zoomSlider = document.getElementById('zoomSlider');
@@ -335,6 +665,17 @@
     const disclaimerFontSizeValue = document.getElementById('disclaimerFontSizeValue');
     const disclaimerColorInput = document.getElementById('disclaimerColor');
     const disclaimerHexValue = document.getElementById('disclaimerHexValue');
+    const disclaimerTextInput = document.getElementById('disclaimerTextInput');
+    const helpOverlay = document.getElementById('helpOverlay');
+    const helpSearch = document.getElementById('helpSearch');
+    const openHelpBtn = document.getElementById('openHelpBtn');
+    const closeHelpBtn = document.getElementById('closeHelpBtn');
+    const prevStepBtn = document.getElementById('prevStepBtn');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const stepTabs = document.querySelectorAll('[data-step-tab]');
+    const stepPanels = document.querySelectorAll('[data-step-panel]');
+    const STEP_COUNT = 4;
+    let currentStep = 0;
     // const disclaimerBoxWidthSlider = document.getElementById('disclaimerBoxWidth');
     // const disclaimerBoxWidthValue = document.getElementById('disclaimerBoxWidthValue');
 
@@ -347,6 +688,7 @@
     let panOffset = { x: 0, y: 0 };
     let isPanning = false;
     let startPanPoint = { x: 0, y: 0 };
+    let isSpaceDown = false;
     
     // Pen Tool State
     let maskPath = null;
@@ -355,9 +697,25 @@
     let isDrawing = false;
     let isDraggingNode = false;
     let draggedNodeIndex = -1;
+    let nodeMovedDuringDrag = false;
+    let dragStartSnapshot = null;
+
+    // History
+    let historyStack = [];
+    let redoStack = [];
+
+    // Outline Eraser State
+    let isOutlineEraserActive = false;
+    let isErasingOutline = false;
+    let outlineEraserStrokes = [];
+    let currentEraserStroke = null;
+    let eraserCursorPos = null;
+    const outlineLayerCanvas = document.createElement('canvas');
+    const outlineLayerCtx = outlineLayerCanvas.getContext('2d');
 
     // Disclaimer State
-    const disclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
+    const defaultDisclaimerText = "Boundary lines are simply for perspective. Buyers are encouraged to consult property survey.";
+    let disclaimerText = defaultDisclaimerText;
     let isDisclaimerVisible = false;
     let isDraggingDisclaimer = false;
     let disclaimerDragOffset = { x: 0, y: 0 };
@@ -378,8 +736,10 @@
     const defaultShadowDistance = 5;
     const defaultShadowAngle = 45;
     const defaultEnableOutline = false;
+    const defaultEnableDashedOutline = false;
     const defaultOutlineColor = '#ffffff';
     const defaultOutlineWidth = 2;
+    const defaultEraserBrushSize = 28;
     const defaultImageUrl = 'https://placehold.co/700x500/A0B0C0/FFFFFF?text=Upload+Image';
     const BASE_PEN_LINE_WIDTH = 3;
     const BASE_PEN_POINT_RADIUS = 6;
@@ -420,6 +780,324 @@
         for (let i = 1; i < maskPoints.length; i++) { path.lineTo(maskPoints[i].x, maskPoints[i].y); }
         path.closePath();
         maskPath = path;
+    }
+
+    function clonePoints(points) {
+        return points.map((p) => ({ x: p.x, y: p.y }));
+    }
+
+    function cloneStrokes(strokes) {
+        return strokes.map((s) => ({ size: s.size, points: clonePoints(s.points) }));
+    }
+
+    function snapshotState() {
+        return {
+            maskPoints: clonePoints(maskPoints),
+            drawingPoints: clonePoints(drawingPoints),
+            isDrawing,
+            eraserStrokes: cloneStrokes(outlineEraserStrokes),
+        };
+    }
+
+    function applySnapshot(snap) {
+        maskPoints = clonePoints(snap.maskPoints);
+        drawingPoints = clonePoints(snap.drawingPoints);
+        isDrawing = snap.isDrawing;
+        outlineEraserStrokes = cloneStrokes(snap.eraserStrokes);
+        currentEraserStroke = null;
+        isErasingOutline = false;
+        updateMaskFromPoints();
+    }
+
+    function pushHistory() {
+        historyStack.push(snapshotState());
+        if (historyStack.length > 40) historyStack.shift();
+        redoStack = [];
+    }
+
+    function undo() {
+        if (isErasingOutline) finishCurrentEraserStroke();
+        if (historyStack.length === 0) {
+            showMessage('Nothing to undo.', 'info');
+            return;
+        }
+        redoStack.push(snapshotState());
+        applySnapshot(historyStack.pop());
+        draw();
+        showMessage('Undo.', 'success');
+    }
+
+    function redo() {
+        if (redoStack.length === 0) {
+            showMessage('Nothing to redo.', 'info');
+            return;
+        }
+        historyStack.push(snapshotState());
+        applySnapshot(redoStack.pop());
+        draw();
+        showMessage('Redo.', 'success');
+    }
+
+    function closeCurrentPath() {
+        if (!isDrawing || drawingPoints.length < 3) {
+            showMessage('Need at least 3 points to close the path.', 'error');
+            return false;
+        }
+        pushHistory();
+        isDrawing = false;
+        maskPoints = [...drawingPoints];
+        drawingPoints = [];
+        updateMaskFromPoints();
+        showMessage('Mask applied!', 'success');
+        draw();
+        return true;
+    }
+
+    function distance(a, b) {
+        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+    }
+
+    function findEdgeHit(pos, threshold) {
+        if (maskPoints.length < 2) return null;
+        let best = null;
+        for (let i = 0; i < maskPoints.length; i++) {
+            const a = maskPoints[i];
+            const b = maskPoints[(i + 1) % maskPoints.length];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const len2 = dx * dx + dy * dy;
+            if (len2 === 0) continue;
+            let t = ((pos.x - a.x) * dx + (pos.y - a.y) * dy) / len2;
+            t = Math.max(0, Math.min(1, t));
+            if (t <= 0.05 || t >= 0.95) continue;
+            const proj = { x: a.x + t * dx, y: a.y + t * dy };
+            const dist = distance(pos, proj);
+            if (dist < threshold && (!best || dist < best.dist)) {
+                best = { insertIndex: i + 1, point: proj, dist };
+            }
+        }
+        return best;
+    }
+
+    function constrainPan() {
+        const maxPanX = canvas.width * zoomLevel - canvas.width;
+        const maxPanY = canvas.height * zoomLevel - canvas.height;
+        panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x));
+        panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+    }
+
+    function applyOutlineDash(targetCtx, lineWidth) {
+        if (enableDashedOutlineInput.checked) {
+            const dash = Math.max(6, lineWidth * 4);
+            targetCtx.setLineDash([dash, dash * 0.75]);
+        } else {
+            targetCtx.setLineDash([]);
+        }
+    }
+
+    function isTypingTarget(el) {
+        if (!el) return false;
+        const tag = el.tagName;
+        return tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || el.isContentEditable;
+    }
+
+    function isHelpOpen() {
+        return helpOverlay.classList.contains('is-open');
+    }
+
+    function filterHelp(query) {
+        const q = (query || '').trim().toLowerCase();
+        helpOverlay.querySelectorAll('[data-help-item]').forEach((el) => {
+            const hay = (el.getAttribute('data-help-item') || '') + ' ' + el.textContent;
+            el.classList.toggle('hidden', Boolean(q) && !hay.toLowerCase().includes(q));
+        });
+        helpOverlay.querySelectorAll('[data-help-section]').forEach((section) => {
+            const visible = [...section.querySelectorAll('[data-help-item]')].some((el) => !el.classList.contains('hidden'));
+            section.classList.toggle('hidden', !visible);
+        });
+    }
+
+    function openHelp() {
+        helpOverlay.classList.add('is-open');
+        filterHelp('');
+        helpSearch.value = '';
+        setTimeout(() => helpSearch.focus(), 0);
+    }
+
+    function closeHelp() {
+        if (!isHelpOpen()) return;
+        helpOverlay.classList.remove('is-open');
+        filterHelp('');
+        helpSearch.value = '';
+    }
+
+    function toggleHelp() {
+        if (isHelpOpen()) closeHelp();
+        else openHelp();
+    }
+
+    function setStep(index) {
+        currentStep = Math.max(0, Math.min(STEP_COUNT - 1, index));
+        stepTabs.forEach((tab) => {
+            const active = parseInt(tab.dataset.stepTab, 10) === currentStep;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        stepPanels.forEach((panel) => {
+            panel.classList.toggle('is-active', parseInt(panel.dataset.stepPanel, 10) === currentStep);
+        });
+        prevStepBtn.disabled = currentStep === 0;
+        nextStepBtn.disabled = currentStep === STEP_COUNT - 1;
+        nextStepBtn.textContent = currentStep === STEP_COUNT - 1 ? 'Done' : 'Next';
+        if (currentStep !== 1) deactivatePenTool();
+        if (currentStep !== 2) deactivateOutlineEraser();
+        updateCanvasCursor();
+        draw();
+    }
+
+    function readImageFile(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            showMessage('Please drop an image file.', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => loadImage(event.target.result);
+        reader.readAsDataURL(file);
+    }
+
+    function getEraserBrushSize() {
+        return parseInt(eraserBrushSizeInput.value, 10) * getPenToolScale();
+    }
+
+    function getAllEraserStrokes() {
+        const strokes = outlineEraserStrokes.slice();
+        if (currentEraserStroke && currentEraserStroke.points.length > 0) {
+            strokes.push(currentEraserStroke);
+        }
+        return strokes;
+    }
+
+    function paintEraserStroke(targetCtx, stroke) {
+        if (!stroke || !stroke.points.length) return;
+        const size = stroke.size;
+        targetCtx.beginPath();
+        if (stroke.points.length === 1) {
+            targetCtx.arc(stroke.points[0].x, stroke.points[0].y, size / 2, 0, Math.PI * 2);
+            targetCtx.fill();
+        } else {
+            targetCtx.lineWidth = size;
+            targetCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
+            for (let i = 1; i < stroke.points.length; i++) {
+                targetCtx.lineTo(stroke.points[i].x, stroke.points[i].y);
+            }
+            targetCtx.stroke();
+        }
+    }
+
+    function clearOutlineEraserStrokes() {
+        outlineEraserStrokes = [];
+        currentEraserStroke = null;
+        isErasingOutline = false;
+    }
+
+    function finishCurrentEraserStroke() {
+        if (currentEraserStroke && currentEraserStroke.points.length > 0) {
+            outlineEraserStrokes.push(currentEraserStroke);
+        }
+        currentEraserStroke = null;
+        isErasingOutline = false;
+    }
+
+    function deactivatePenTool() {
+        if (!isPenToolActive) return;
+        isPenToolActive = false;
+        isDrawing = false;
+        activatePenToolBtn.textContent = 'Activate Pen Tool';
+        activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
+    }
+
+    function deactivateOutlineEraser() {
+        if (!isOutlineEraserActive) return;
+        finishCurrentEraserStroke();
+        isOutlineEraserActive = false;
+        eraserCursorPos = null;
+        activateOutlineEraserBtn.textContent = 'Activate Eraser';
+        activateOutlineEraserBtn.classList.replace('bg-orange-500', 'bg-blue-500');
+        canvas.classList.remove('eraser-active');
+    }
+
+    function updateCanvasCursor() {
+        if (isSpaceDown && zoomLevel > 1) {
+            canvas.classList.remove('eraser-active');
+            canvas.style.cursor = isPanning ? 'grabbing' : 'grab';
+            return;
+        }
+        if (isOutlineEraserActive) {
+            canvas.classList.add('eraser-active');
+            canvas.style.cursor = 'none';
+        } else {
+            canvas.classList.remove('eraser-active');
+            canvas.style.cursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
+        }
+    }
+
+    function drawMaskOutline(targetCtx) {
+        if (!enableOutlineInput.checked || !maskPath) return;
+
+        const strokes = getAllEraserStrokes();
+        const lineWidth = parseInt(outlineWidthInput.value, 10);
+
+        if (strokes.length === 0) {
+            targetCtx.save();
+            targetCtx.globalAlpha = 1.0;
+            targetCtx.strokeStyle = outlineColorInput.value;
+            targetCtx.lineWidth = lineWidth;
+            applyOutlineDash(targetCtx, lineWidth);
+            targetCtx.stroke(maskPath);
+            targetCtx.restore();
+            return;
+        }
+
+        if (outlineLayerCanvas.width !== canvas.width || outlineLayerCanvas.height !== canvas.height) {
+            outlineLayerCanvas.width = canvas.width;
+            outlineLayerCanvas.height = canvas.height;
+        }
+        outlineLayerCtx.setTransform(1, 0, 0, 1, 0, 0);
+        outlineLayerCtx.clearRect(0, 0, outlineLayerCanvas.width, outlineLayerCanvas.height);
+        outlineLayerCtx.strokeStyle = outlineColorInput.value;
+        outlineLayerCtx.lineWidth = lineWidth;
+        applyOutlineDash(outlineLayerCtx, lineWidth);
+        outlineLayerCtx.stroke(maskPath);
+        outlineLayerCtx.setLineDash([]);
+
+        outlineLayerCtx.save();
+        outlineLayerCtx.globalCompositeOperation = 'destination-out';
+        outlineLayerCtx.strokeStyle = '#000';
+        outlineLayerCtx.fillStyle = '#000';
+        outlineLayerCtx.lineCap = 'round';
+        outlineLayerCtx.lineJoin = 'round';
+        for (const stroke of strokes) {
+            paintEraserStroke(outlineLayerCtx, stroke);
+        }
+        outlineLayerCtx.restore();
+
+        targetCtx.drawImage(outlineLayerCanvas, 0, 0);
+    }
+
+    function drawEraserBrushPreview(targetCtx) {
+        if (!isOutlineEraserActive || !eraserCursorPos) return;
+        const radius = getEraserBrushSize() / 2;
+        targetCtx.save();
+        targetCtx.beginPath();
+        targetCtx.arc(eraserCursorPos.x, eraserCursorPos.y, radius, 0, Math.PI * 2);
+        targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        targetCtx.lineWidth = 2 / zoomLevel;
+        targetCtx.stroke();
+        targetCtx.beginPath();
+        targetCtx.arc(eraserCursorPos.x, eraserCursorPos.y, radius, 0, Math.PI * 2);
+        targetCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        targetCtx.setLineDash([4 / zoomLevel, 4 / zoomLevel]);
+        targetCtx.stroke();
+        targetCtx.restore();
     }
 
     function getDisclaimerLines(context) {
@@ -502,10 +1180,15 @@
         shadowAngleInput.value = defaultShadowAngle;
         shadowAngleValueSpan.textContent = `${defaultShadowAngle}°`;
         enableOutlineInput.checked = defaultEnableOutline;
+        enableDashedOutlineInput.checked = defaultEnableDashedOutline;
         outlineColorInput.value = defaultOutlineColor;
         outlineHexValueSpan.textContent = defaultOutlineColor;
         outlineWidthInput.value = defaultOutlineWidth;
         outlineWidthValueSpan.textContent = `${defaultOutlineWidth}px`;
+        eraserBrushSizeInput.value = defaultEraserBrushSize;
+        eraserBrushSizeValueSpan.textContent = `${defaultEraserBrushSize}px`;
+        deactivateOutlineEraser();
+        clearOutlineEraserStrokes();
         
         zoomSlider.value = 1.0;
         zoomValueSpan.textContent = '100%';
@@ -526,9 +1209,8 @@
         disclaimerHexValue.textContent = '#FFFFFF';
         
         disclaimerProps.boxWidth = 500;
-        // disclaimerBoxWidthSlider.max = canvas.width || 1000;
-        // disclaimerBoxWidthSlider.value = 500;
-        // disclaimerBoxWidthValue.textContent = '500px';
+        disclaimerText = defaultDisclaimerText;
+        disclaimerTextInput.value = defaultDisclaimerText;
     }
 
     function showMessage(message, type = 'info') {
@@ -540,14 +1222,36 @@
         setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
     }
     
-    function loadImage(src) {
+    function loadImage(src, options = {}) {
         originalImage.onload = () => {
             isImageLoaded = true;
             canvas.width = originalImage.width;
             canvas.height = originalImage.height;
-            initializeControls();
+            if (!options.preserveState) {
+                initializeControls();
+                drawingPoints = [];
+                maskPoints = [];
+                maskPath = null;
+                isDrawing = false;
+                historyStack = [];
+                redoStack = [];
+            } else {
+                zoomLevel = 1.0;
+                panOffset = { x: 0, y: 0 };
+                zoomSlider.value = 1.0;
+                zoomValueSpan.textContent = '100%';
+                if (options.restoreMask) {
+                    maskPoints = options.restoreMask;
+                    updateMaskFromPoints();
+                }
+                if (options.restoreEraser) {
+                    outlineEraserStrokes = options.restoreEraser;
+                    currentEraserStroke = null;
+                    isErasingOutline = false;
+                }
+            }
             draw();
-            showMessage('Image loaded successfully!', 'success');
+            showMessage(options.message || 'Image loaded successfully!', 'success');
         };
         originalImage.onerror = () => {
             isImageLoaded = false;
@@ -557,7 +1261,9 @@
         originalImage.src = src;
     }
 
-    function draw() {
+    function draw(options = {}) {
+        const isExport = options.isExport === true;
+
         if (!isImageLoaded) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#f0f0f0';
@@ -598,44 +1304,41 @@
             ctx.shadowOffsetY = sd * Math.sin(sa);
             ctx.drawImage(tempCanvas, 0, 0);
             ctx.restore();
-            if (enableOutlineInput.checked) {
-                ctx.save();
-                ctx.globalAlpha = 1.0;  // Ensure full opacity for outline
-                ctx.strokeStyle = outlineColorInput.value;
-                ctx.lineWidth = parseInt(outlineWidthInput.value);
-                ctx.stroke(maskPath);
-                ctx.restore();
-            }
+            drawMaskOutline(ctx);
         }
 
-        const scale = getPenToolScale();
-        if (isDrawing && drawingPoints.length > 0) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-            ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
-            ctx.beginPath();
-            ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-            for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-            drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
-            if (drawingPoints.length > 0) {
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+        if (!isExport) {
+            const scale = getPenToolScale();
+            if (isDrawing && drawingPoints.length > 0) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+                ctx.lineWidth = BASE_PEN_LINE_WIDTH * scale;
                 ctx.beginPath();
-                ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+                for (let i = 1; i < drawingPoints.length; i++) { ctx.lineTo(drawingPoints[i].x, drawingPoints[i].y); }
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+                drawingPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+                if (drawingPoints.length > 0) {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(drawingPoints[0].x, drawingPoints[0].y, BASE_PEN_FIRST_POINT_RADIUS * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
-        }
-        
-        if (isPenToolActive && maskPoints.length > 0) {
-            ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
-            ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
-            ctx.beginPath();
-            ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
-            for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
-            ctx.closePath();
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
-            maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+            
+            if (isPenToolActive && maskPoints.length > 0) {
+                ctx.strokeStyle = 'rgba(0, 100, 255, 0.7)';
+                ctx.lineWidth = (BASE_PEN_LINE_WIDTH - 1) * scale;
+                ctx.beginPath();
+                ctx.moveTo(maskPoints[0].x, maskPoints[0].y);
+                for (let i = 1; i < maskPoints.length; i++) { ctx.lineTo(maskPoints[i].x, maskPoints[i].y); }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
+                maskPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_PEN_POINT_RADIUS * scale, 0, Math.PI * 2); ctx.fill(); });
+            }
+
+            drawEraserBrushPreview(ctx);
         }
         
         drawDisclaimerAndBox(ctx);
@@ -645,7 +1348,7 @@
     // --- Event Listeners ---
     imageUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) { const reader = new FileReader(); reader.onload = (event) => loadImage(event.target.result); reader.readAsDataURL(file); }
+        if (file) readImageFile(file);
     });
     
     overlayColorInput.addEventListener('input', () => { overlayHexValueSpan.textContent = overlayColorInput.value; draw(); });
@@ -658,32 +1361,80 @@
     shadowAngleInput.addEventListener('input', () => { shadowAngleValueSpan.textContent = `${shadowAngleInput.value}°`; draw(); });
     
     activatePenToolBtn.addEventListener('click', () => {
-        isPenToolActive = !isPenToolActive;
         if (isPenToolActive) {
+            deactivatePenTool();
+            showMessage('Pen tool deactivated.', 'info');
+        } else {
+            deactivateOutlineEraser();
+            isPenToolActive = true;
             activatePenToolBtn.textContent = 'Deactivate Pen Tool';
             activatePenToolBtn.classList.replace('bg-blue-500', 'bg-orange-500');
             showMessage('Pen tool activated.', 'info');
-            canvas.style.cursor = 'crosshair';
-        } else {
-            activatePenToolBtn.textContent = 'Activate Pen Tool';
-            activatePenToolBtn.classList.replace('bg-orange-500', 'bg-blue-500');
-            isDrawing = false;
-            showMessage('Pen tool deactivated.', 'info');
-            canvas.style.cursor = 'default';
         }
+        updateCanvasCursor();
         draw();
     });
 
+    closePathBtn.addEventListener('click', () => { closeCurrentPath(); });
+
     clearMaskBtn.addEventListener('click', () => {
+        if (!maskPoints.length && !drawingPoints.length) {
+            showMessage('Nothing to clear.', 'info');
+            return;
+        }
+        if (!confirm('Clear the property mask and any erased outline sections?')) return;
+        pushHistory();
         drawingPoints = [];
         maskPoints = [];
         maskPath = null;
         isDrawing = false;
+        clearOutlineEraserStrokes();
         showMessage('Mask cleared!', 'success');
         draw();
     });
 
+    activateOutlineEraserBtn.addEventListener('click', () => {
+        if (isOutlineEraserActive) {
+            deactivateOutlineEraser();
+            showMessage('Outline eraser deactivated.', 'info');
+        } else {
+            if (!maskPath) {
+                showMessage('Draw a property mask and enable the outline first.', 'error');
+                return;
+            }
+            deactivatePenTool();
+            isOutlineEraserActive = true;
+            activateOutlineEraserBtn.textContent = 'Deactivate Eraser';
+            activateOutlineEraserBtn.classList.replace('bg-blue-500', 'bg-orange-500');
+            if (!enableOutlineInput.checked) {
+                enableOutlineInput.checked = true;
+            }
+            showMessage('Paint over the property line to hide it over buildings.', 'info');
+        }
+        updateCanvasCursor();
+        draw();
+    });
+
+    undoOutlineEraserBtn.addEventListener('click', () => { undo(); });
+
+    clearOutlineEraserBtn.addEventListener('click', () => {
+        if (outlineEraserStrokes.length === 0 && !currentEraserStroke) {
+            showMessage('No erased sections to restore.', 'info');
+            return;
+        }
+        pushHistory();
+        clearOutlineEraserStrokes();
+        showMessage('Property line restored.', 'success');
+        draw();
+    });
+
+    eraserBrushSizeInput.addEventListener('input', () => {
+        eraserBrushSizeValueSpan.textContent = `${eraserBrushSizeInput.value}px`;
+        if (isOutlineEraserActive) draw();
+    });
+
     enableOutlineInput.addEventListener('change', draw);
+    enableDashedOutlineInput.addEventListener('change', draw);
     outlineColorInput.addEventListener('input', () => { outlineHexValueSpan.textContent = outlineColorInput.value; draw(); });
     outlineWidthInput.addEventListener('input', () => { outlineWidthValueSpan.textContent = `${outlineWidthInput.value}px`; draw(); });
     
@@ -691,7 +1442,8 @@
         zoomLevel = parseFloat(e.target.value);
         zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
         if (zoomLevel === 1) { panOffset = { x: 0, y: 0 }; }
-        canvas.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        constrainPan();
+        updateCanvasCursor();
         draw();
     });
 
@@ -699,22 +1451,35 @@
     
     applyCropBtn.addEventListener('click', () => {
         if (!isImageLoaded) return;
-        const sX = -panOffset.x, sY = -panOffset.y, sW = canvas.width / zoomLevel, sH = canvas.height / zoomLevel;
+        const sX = -panOffset.x / zoomLevel;
+        const sY = -panOffset.y / zoomLevel;
+        const sW = canvas.width / zoomLevel;
+        const sH = canvas.height / zoomLevel;
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = sW; tempCanvas.height = sH;
         const tempCtx = tempCanvas.getContext('2d');
         tempCtx.drawImage(originalImage, sX, sY, sW, sH, 0, 0, sW, sH);
-        clearMaskBtn.click();
-        loadImage(tempCanvas.toDataURL());
-        showMessage('Crop applied!', 'success');
+        const restoreMask = maskPoints.map((p) => ({ x: p.x - sX, y: p.y - sY }));
+        const restoreEraser = outlineEraserStrokes.map((stroke) => ({
+            size: stroke.size,
+            points: stroke.points.map((p) => ({ x: p.x - sX, y: p.y - sY })),
+        }));
+        loadImage(tempCanvas.toDataURL(), {
+            preserveState: true,
+            restoreMask: restoreMask.length ? restoreMask : null,
+            restoreEraser,
+            message: 'Crop applied!',
+        });
     });
     
     saveAsJpgBtn.addEventListener('click', () => {
         if (!isImageLoaded) { showMessage('Please upload an image first!', 'error'); return; }
+        draw({ isExport: true });
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/jpeg', 0.9);
         link.download = 'graphics_manipulated.jpg';
         link.click();
+        draw();
         showMessage('Image saved as JPG!', 'success');
     });
     
@@ -759,8 +1524,21 @@
         draw();
     });
 
-    canvas.addEventListener('mousedown', (e) => {
+    disclaimerTextInput.addEventListener('input', (e) => {
+        disclaimerText = e.target.value;
+        draw();
+    });
+
+    function pointerDown(e) {
         const pos = getMousePos(canvas, e);
+        if (e.button === 1 && e.preventDefault) e.preventDefault();
+
+        if ((isSpaceDown || e.button === 1) && zoomLevel > 1) {
+            isPanning = true;
+            startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
+            canvas.style.cursor = 'grabbing';
+            return;
+        }
 
         const bounds = getDisclaimerBounds(ctx);
         if (isDisclaimerVisible && bounds && pos.tx > bounds.x && pos.tx < bounds.x + bounds.width && pos.ty > bounds.y && pos.ty < bounds.y + bounds.height) {
@@ -769,37 +1547,86 @@
             return;
         }
 
-        if (isPenToolActive) {
+        if (isOutlineEraserActive) {
+            isErasingOutline = true;
+            currentEraserStroke = {
+                points: [{ x: pos.tx, y: pos.ty }],
+                size: getEraserBrushSize()
+            };
+            draw();
+            return;
+        }
+
+        if (isPenToolActive && maskPoints.length > 0 && !isDrawing) {
+            const imgPos = { x: pos.tx, y: pos.ty };
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             for (let i = 0; i < maskPoints.length; i++) {
                 const node = maskPoints[i];
-                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
-                    isDraggingNode = true; draggedNodeIndex = i; canvas.style.cursor = 'grabbing';
+                if (distance(imgPos, node) < nodeRadius) {
+                    if (e.altKey) {
+                        if (maskPoints.length <= 3) {
+                            showMessage('Need at least 3 points on the mask.', 'error');
+                            return;
+                        }
+                        pushHistory();
+                        maskPoints.splice(i, 1);
+                        updateMaskFromPoints();
+                        showMessage('Vertex deleted.', 'success');
+                        draw();
+                        return;
+                    }
+                    isDraggingNode = true;
+                    draggedNodeIndex = i;
+                    nodeMovedDuringDrag = false;
+                    dragStartSnapshot = snapshotState();
+                    canvas.style.cursor = 'grabbing';
                     return;
                 }
             }
+            const edgeHit = findEdgeHit(imgPos, Math.max(10, parseInt(outlineWidthInput.value, 10) + 6) * getPenToolScale());
+            if (edgeHit) {
+                pushHistory();
+                maskPoints.splice(edgeHit.insertIndex, 0, edgeHit.point);
+                updateMaskFromPoints();
+                isDraggingNode = true;
+                draggedNodeIndex = edgeHit.insertIndex;
+                nodeMovedDuringDrag = false;
+                dragStartSnapshot = snapshotState();
+                canvas.style.cursor = 'grabbing';
+                draw();
+                return;
+            }
+            return;
         }
         
-        if (zoomLevel > 1 && !isPenToolActive) {
+        if (zoomLevel > 1 && !isPenToolActive && !isOutlineEraserActive) {
             isPanning = true; startPanPoint = { x: pos.x - panOffset.x, y: pos.y - panOffset.y }; canvas.style.cursor = 'grabbing';
             return;
         }
         
         if (isPenToolActive) {
-            if (!isDrawing) { maskPoints = []; maskPath = null; drawingPoints = []; }
-            isDrawing = true;
+            if (!isDrawing) {
+                drawingPoints = [];
+                isDrawing = true;
+            }
             if (drawingPoints.length > 0) {
                 const firstPoint = drawingPoints[0];
-                if (Math.sqrt(Math.pow(pos.tx - firstPoint.x, 2) + Math.pow(pos.ty - firstPoint.y, 2)) < BASE_PEN_CLOSE_THRESHOLD * getPenToolScale()) {
-                    isDrawing = false; maskPoints = [...drawingPoints]; drawingPoints = []; updateMaskFromPoints();
-                    showMessage('Mask applied!', 'success');
-                } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
-            } else { drawingPoints.push({ x: pos.tx, y: pos.ty }); }
+                if (distance({ x: pos.tx, y: pos.ty }, firstPoint) < BASE_PEN_CLOSE_THRESHOLD * getPenToolScale()) {
+                    closeCurrentPath();
+                    return;
+                } else {
+                    pushHistory();
+                    drawingPoints.push({ x: pos.tx, y: pos.ty });
+                }
+            } else {
+                pushHistory();
+                drawingPoints.push({ x: pos.tx, y: pos.ty });
+            }
         }
         draw();
-    });
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
+    function pointerMove(e) {
         const pos = getMousePos(canvas, e);
         if (isDraggingDisclaimer) {
             disclaimerProps.x = pos.tx - disclaimerDragOffset.x; disclaimerProps.y = pos.ty - disclaimerDragOffset.y;
@@ -807,25 +1634,45 @@
         }
         if (isDraggingNode) {
             maskPoints[draggedNodeIndex].x = pos.tx; maskPoints[draggedNodeIndex].y = pos.ty;
+            nodeMovedDuringDrag = true;
             updateMaskFromPoints(); draw(); return;
+        }
+        if (isErasingOutline && currentEraserStroke) {
+            currentEraserStroke.points.push({ x: pos.tx, y: pos.ty });
+            eraserCursorPos = { x: pos.tx, y: pos.ty };
+            draw(); return;
         }
         if (isPanning) {
             panOffset.x = pos.x - startPanPoint.x; panOffset.y = pos.y - startPanPoint.y;
-            const maxPanX = (canvas.width * zoomLevel - canvas.width), maxPanY = (canvas.height * zoomLevel - canvas.height);
-            panOffset.x = Math.max(-maxPanX, Math.min(0, panOffset.x)); panOffset.y = Math.max(-maxPanY, Math.min(0, panOffset.y));
+            constrainPan();
             draw(); return;
         }
 
+        if (isOutlineEraserActive && !isSpaceDown) {
+            eraserCursorPos = { x: pos.tx, y: pos.ty };
+            draw();
+            return;
+        }
+
         let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
-        let cursorSet = false;
+        if (isSpaceDown && zoomLevel > 1) newCursor = 'grab';
+        let cursorSet = isSpaceDown && zoomLevel > 1;
         
-        if (isPenToolActive && maskPoints.length > 0) {
+        if (!cursorSet && isPenToolActive && maskPoints.length > 0 && !isDrawing) {
+            const imgPos = { x: pos.tx, y: pos.ty };
             const nodeRadius = BASE_PEN_POINT_RADIUS * getPenToolScale();
             for (const node of maskPoints) {
-                if (Math.sqrt(Math.pow(pos.tx - node.x, 2) + Math.pow(pos.ty - node.y, 2)) < nodeRadius) {
+                if (distance(imgPos, node) < nodeRadius) {
                     newCursor = 'grab';
                     cursorSet = true;
                     break;
+                }
+            }
+            if (!cursorSet) {
+                const edgeHit = findEdgeHit(imgPos, Math.max(10, parseInt(outlineWidthInput.value, 10) + 6) * getPenToolScale());
+                if (edgeHit) {
+                    newCursor = 'copy';
+                    cursorSet = true;
                 }
             }
         }
@@ -836,23 +1683,171 @@
                 newCursor = 'move';
             }
         }
-        canvas.style.cursor = newCursor;
-    });
+        if (!isOutlineEraserActive || isSpaceDown) canvas.style.cursor = newCursor;
+    }
 
-    canvas.addEventListener('mouseup', () => {
+    function pointerUp() {
+        if (isErasingOutline) {
+            finishCurrentEraserStroke();
+            if (outlineEraserStrokes.length) {
+                const last = outlineEraserStrokes.pop();
+                pushHistory();
+                outlineEraserStrokes.push(last);
+            }
+        }
+        if (isDraggingNode && nodeMovedDuringDrag && dragStartSnapshot) {
+            historyStack.push(dragStartSnapshot);
+            if (historyStack.length > 40) historyStack.shift();
+            redoStack = [];
+        }
         isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
-        let newCursor = isPenToolActive ? 'crosshair' : (zoomLevel > 1 ? 'grab' : 'default');
-        canvas.style.cursor = newCursor;
-    });
+        nodeMovedDuringDrag = false;
+        dragStartSnapshot = null;
+        updateCanvasCursor();
+        draw();
+    }
+
+    canvas.addEventListener('mousedown', pointerDown);
+    canvas.addEventListener('mousemove', pointerMove);
+    canvas.addEventListener('mouseup', pointerUp);
     
     canvas.addEventListener('mouseleave', () => {
+        if (isErasingOutline) {
+            finishCurrentEraserStroke();
+            if (outlineEraserStrokes.length) {
+                const last = outlineEraserStrokes.pop();
+                pushHistory();
+                outlineEraserStrokes.push(last);
+            }
+        }
         isPanning = false; isDraggingDisclaimer = false; isDraggingNode = false; draggedNodeIndex = -1;
-        canvas.style.cursor = 'default';
+        nodeMovedDuringDrag = false;
+        eraserCursorPos = null;
+        updateCanvasCursor();
+        draw();
+    });
+
+    canvas.addEventListener('dblclick', (e) => {
+        if (!isPenToolActive || !isDrawing) return;
+        e.preventDefault();
+        if (drawingPoints.length > 1) drawingPoints.pop();
+        closeCurrentPath();
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        if (!isImageLoaded) return;
+        e.preventDefault();
+        const pos = getMousePos(canvas, e);
+        const oldZoom = zoomLevel;
+        const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        zoomLevel = Math.max(1, Math.min(10, zoomLevel * factor));
+        panOffset.x = pos.x - (pos.x - panOffset.x) * (zoomLevel / oldZoom);
+        panOffset.y = pos.y - (pos.y - panOffset.y) * (zoomLevel / oldZoom);
+        if (zoomLevel === 1) panOffset = { x: 0, y: 0 };
+        constrainPan();
+        zoomSlider.value = zoomLevel;
+        zoomValueSpan.textContent = `${Math.round(zoomLevel * 100)}%`;
+        updateCanvasCursor();
+        draw();
+    }, { passive: false });
+
+    canvas.addEventListener('touchstart', (e) => {
+        if (!e.touches.length) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        pointerDown({ clientX: t.clientX, clientY: t.clientY, button: 0, altKey: false });
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+        if (!e.touches.length) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        pointerMove({ clientX: t.clientX, clientY: t.clientY });
+    }, { passive: false });
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); pointerUp(); }, { passive: false });
+    canvas.addEventListener('touchcancel', () => pointerUp());
+
+    ['dragenter', 'dragover'].forEach((type) => {
+        canvas.addEventListener(type, (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+    });
+    canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) readImageFile(file);
+    });
+
+    stepTabs.forEach((tab) => {
+        tab.addEventListener('click', () => setStep(parseInt(tab.dataset.stepTab, 10)));
+    });
+    prevStepBtn.addEventListener('click', () => setStep(currentStep - 1));
+    nextStepBtn.addEventListener('click', () => setStep(currentStep + 1));
+
+    openHelpBtn.addEventListener('click', openHelp);
+    closeHelpBtn.addEventListener('click', closeHelp);
+    helpOverlay.addEventListener('click', (e) => {
+        if (e.target === helpOverlay) closeHelp();
+    });
+    helpSearch.addEventListener('input', (e) => filterHelp(e.target.value));
+
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            toggleHelp();
+            return;
+        }
+        if (e.key === 'Escape' && isHelpOpen()) {
+            e.preventDefault();
+            closeHelp();
+            return;
+        }
+        if (isHelpOpen()) return;
+        if (isTypingTarget(e.target)) return;
+        if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            e.preventDefault();
+            openHelp();
+            return;
+        }
+        if (e.code === 'Space') {
+            if (!isSpaceDown) {
+                isSpaceDown = true;
+                updateCanvasCursor();
+            }
+            e.preventDefault();
+            return;
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            if (e.shiftKey) redo(); else undo();
+            return;
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            redo();
+            return;
+        }
+        if (e.key === 'Enter' && isPenToolActive && isDrawing) {
+            e.preventDefault();
+            closeCurrentPath();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+            isSpaceDown = false;
+            updateCanvasCursor();
+        }
+    });
+    window.addEventListener('blur', () => {
+        isSpaceDown = false;
+        updateCanvasCursor();
     });
     
     resetAllBtn.addEventListener('click', () => {
-        loadImage(defaultImageUrl);
-        showMessage('All settings reset!', 'success');
+        if (!confirm('Reset the image and all edits?')) return;
+        setStep(0);
+        loadImage(defaultImageUrl, { message: 'All settings reset!' });
     });
 
     window.addEventListener('resize', draw);
@@ -865,5 +1860,6 @@
 </script> 
 
 
-</body>
-</html>
+
+
+</body></html>
